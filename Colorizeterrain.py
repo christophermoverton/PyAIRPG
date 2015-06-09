@@ -55,6 +55,12 @@ def getpixelcoord(uv, dimX = dimX, dimY = dimY):
     ux,uy = uv
     return [ux*dimX, uy*dimY]
 
+diff = maxheight-minheight,
+flood=0.5  ## flood plain
+mount=0.85 ##mountain level
+	
+flood*=diff
+mount*=diff
 landlow = (0,64,0)
 landhigh = (116,182,133)
 waterlow = (0,0,55)
@@ -76,6 +82,7 @@ dimY = 2048
 ## -A dictionary called vcoordtovindexrev dictionary.  This is
 ##  a vertex index keyed to local coordinate value dictionary.
 ## So three dictionaries indicated above are necessary for this algorithm.
+## Also you will need to provide maximum and minimum heights
 
 ## It is assumed likely that the UV assigned faces are likely supplied
 ## such that any number of pixels will have unassigned/non computed
@@ -111,10 +118,13 @@ for f in bm.faces:
     if vertmatch:
         continue
     uvcoords = []
+    uvheights = []
     for vi in verts:
         vcoord = vcoordtovindexrev[vind]
         uvcoord = sphereproj[vcoord]
+        u,v = uvcoord
         uvcoords.append(list(uvcoord))
+        uvheights.append([u,v,heightmap[vi]])
     ## get min max coords
     sortset = uvcoords[0:len(uvcoords)]
     sortset.sort(key=lambda tup: tup[0])
@@ -132,3 +142,11 @@ for f in bm.faces:
     pixcoord = minpixcoord
     for j in range(minpixcoord[1],maxpixcoord[1]):
         for i in range(minpixcoord[0],maxpixcoord[0]):
+            h = bilinear_interpolation(i, j, points) ## bilinearly interpolated height for uv
+            if (h<flood):
+                newcolor=colorlerp(waterlow,waterhigh,h/flood)
+            elif (h>mount):
+                newcolor=colorlerp(mountlow,mounthigh,(h-mount)/(diff-mount))
+            else:
+                newcolor=colorlerp(landlow,landhigh,(h-flood)/(mount-flood));
+            

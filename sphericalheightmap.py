@@ -199,6 +199,9 @@ def buildSphere(Radius, anglesub):
 vertices, faces, sphereproj, vcoordtovindex = buildSphere(Radius, anglesub)
 heightmap = {} ## vertex index keyed, heightmap valued
 i = 0
+minheight = float('inf')  ## any height greater than minheight will initialize
+maxheight = -1*float('inf')  ## any height less than maxheight will initialize
+## these are positive and negative infinity respectively
 while i < Iterations:
     rN = randomNormal()
     height = Height*random.random()
@@ -211,6 +214,10 @@ while i < Iterations:
             vheight = scalemult(-1*height,vN)
             newvec = addvec(vert,vheight)
         heightmap[vi] = height
+        if height > maxheight:
+            maxheight = height
+        if height < minheight:
+            minheight = height
         del vcoordtovindex[vert]
         scoord = sphereproj[vert]
         sphereproj[newvec] = scoord
