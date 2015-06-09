@@ -267,3 +267,25 @@ civtypetofoodproduct = {1:(89,97), 2:(77,90), 3:(31,80), 4:(20,40),
                         5:(2,30)}
                         ## where yields are in the percentile per capita and
                         ## are given to minimum and maximum ranges
+
+civtopopulation = {1:(3,200000) 2:(175000,10000000), 3:(900000,70000000),
+                   4:(60000000,300000000), 5:(275000000,7000000000}
+
+## Economy node -> 'civtype', 'power', 'population'
+## initialize world  ## number of civilizations
+civtypedensities = {1:(2,1000000),}  ## theoretical the idea here is that initialization
+## should be reasonable with respect to the number of civilization types (
+## frequencies of type 1 civilization in correspondence to the higher order
+## distributions.  For instance, on this planet we may have had 3 or 4??
+## type 3 to type 4 in existence at any one time at most, one would logically
+## expect only 1 type 5 civilization while, the distributions of type 1 or
+## to type 2 civilizations would be most common potential at any time. 
+## I have thrown an oddball 1,000,000 type 1 civilization for the maximum range
+## of type 1 civilizations...these can socially inter communicate by the way,
+## and thus can be, for instance, tribes communicating with other tribal systems.
+### the other part of this problem come by way of finding a sensible geographic
+### distribution.  Although in this hypothetical structuring we consider the
+### the possibility that a planet may be earth like, but also super earth like,or
+### potentially smaller.  I am thinking of creating a spherical subdivision
+## method which geometrically subdivides the sphere to create geographic
+## distribution of water to land mass ratios.

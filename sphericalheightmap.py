@@ -1,0 +1,173 @@
+## Spherical subdivision
+import math
+import bpy
+## spherical coordinates
+anglesub = 100
+Radius  = 1
+
+def distance(coord):
+    x,y,z = coord
+    return (x*x+y*y+z*z)**.5
+
+def norm(coord):
+    d = distance(coord)
+    x,y,z = coord
+    return (x/d,y/d,z/d)
+
+def spheretocoord(r,theta,phi):
+    return (r*math.cos(theta)*math.sin(phi), r*math.sin(theta)*math.sin(phi),
+            r*math.cos(phi))
+
+def buildSphere(Radius, anglesub):
+    ## build equitorial subdivision
+    thetainc = 2*math.pi/anglesub
+    vertices = []
+    theta = 0.0
+    phi = math.pi/2.0
+    for i in range(anglesub+1):
+        vertices.append(spheretocoord(Radius,theta,phi))
+        theta += thetainc
+    ## now build positive hemisphere
+    evertices = vertices[0:len(vertices)]
+    theta = 0.0
+    phi -= thetainc
+    vertgroups = []
+    ##vertgroups += [vertices]
+    for i in range(int(anglesub/4+1)):
+        theta = 0.0
+        verts = []  ## we build a ordered list as we increment phi of vertices
+        if i != int(anglesub/4 ):
+            for j in range(anglesub+1):
+                verts.append(spheretocoord(Radius,theta,phi))
+                theta += thetainc
+            phi -= thetainc
+            vertgroups.append(verts)
+        else:
+            verts.append(spheretocoord(Radius,theta,0.0))
+    ## build the faces and append the vertices
+    faces = []
+    vcoordtovindex = {}
+    for i,vert in enumerate(vertices):
+        vcoordtovindex[vert] = i
+        
+    for verts in vertgroups:
+        for vert in verts:
+            vertices.append(vert)
+            vcoordtovindex[vert] = len(vertices)-1
+    newvertgroups = [evertices]
+    newvertgroups += vertgroups
+    vertgroups = newvertgroups
+    ##vertgroups += [vertices]
+    ifacerow = 0 ## initial face row tracking
+    for vgindex,verts in enumerate(vertgroups):
+        
+        if vgindex == len(vertgroups) -1:
+            break
+        nvertices = vertgroups[vgindex+1]
+        for vindex, vertex in enumerate(verts):
+            face = []
+            if vindex == len(verts)-1:
+                nvindex = 0
+            else:
+                nvindex1 = vindex+1
+            if vgindex+1 == len(vertgroups)-1:
+                nv1 = verts[nvindex1]
+                nv2 = nvertices[0]
+                nv3 = nvertices[0]
+            else:
+                nv1 = verts[nvindex1]
+                nv2 = nvertices[nvindex1]
+                nv3 = nvertices[vindex]
+            vi = vcoordtovindex[vertex]
+            nv1i = vcoordtovindex[nv1]
+            nv2i = vcoordtovindex[nv2]
+            nv3i = vcoordtovindex[nv3]
+            face = (vi,nv1i,nv2i,nv3i)
+            if vgindex == 0:
+                ifacerow += 1
+            faces.append(face)
+            ##print(face)
+    fvinc = len(vertices)
+    ## build negative hemisphere
+    theta = 0.0
+    phi = math.pi/2.0
+    phi += thetainc
+    vertgroups = []
+    vertgroups += [evertices]
+    for i in range(int(anglesub/4+1)):
+        theta = 0.0
+        verts = []  ## we build a ordered list as we increment phi of vertices
+        if i != int(anglesub/4):
+            for j in range(anglesub+1):
+                v = spheretocoord(Radius,theta,phi)
+                verts.append(v)
+                vertices.append(v)
+                vcoordtovindex[v] = len(vertices)-1
+                theta += thetainc
+            phi += thetainc
+##            print(phi)
+##            vertices += verts[0:len(verts)]
+            vertgroups += [verts]
+        else:
+            ##verts.append(spheretocoord(Radius,theta,phi))
+            v = spheretocoord(Radius,theta,0.0)
+            vertices += [v]
+            vcoordtovindex[v] = len(vertices)-1
+            vertgroups += [[v]]
+##    newfaces = []
+##    for fi, face in enumerate(faces):
+##        newface = []
+##        if fi <= ifacerow:
+##            v1,v2,v3,v4 = face
+##            nv1 = v1
+##            nv2 = v2
+##            nv3 = v3 + fvinc
+##            nv4 = v4 + fvinc
+##        else:
+##            nv1 = v1 + fvinc
+##            nv2 = v2 + fvinc
+##            nv3 = v3 + fvinc
+##            nv4 = v4 + fvinc
+##        newface = (nv1,nv2,nv3,nv4)
+##        newfaces.append(newface)
+##    faces += newfaces
+    for vgindex,verts in enumerate(vertgroups):
+        
+        if vgindex == len(vertgroups) -1:
+            break
+        nvertices = vertgroups[vgindex+1]
+        for vindex, vertex in enumerate(verts):
+            face = []
+            if vindex == len(verts)-1:
+                nvindex = 0
+            else:
+                nvindex1 = vindex+1
+            if vgindex+1 == len(vertgroups)-1:
+                nv1 = verts[nvindex1]
+                nv2 = nvertices[0]
+                nv3 = nvertices[0]
+            else:
+                nv1 = verts[nvindex1]
+                nv2 = nvertices[nvindex1]
+                nv3 = nvertices[vindex]
+            vi = vcoordtovindex[vertex]
+            nv1i = vcoordtovindex[nv1]
+            nv2i = vcoordtovindex[nv2]
+            nv3i = vcoordtovindex[nv3]
+            ##face = (vi,nv1i,nv2i,nv3i)
+            face = (vi,nv3i,nv2i,nv1i)
+            if vgindex == 0:
+                ifacerow += 1
+            faces.append(face)
+    
+    return vertices, faces
+                
+vertices, faces = buildSphere(Radius, anglesub)
+meshName = "Polygon"
+obName = "PolygonObj"
+me = bpy.data.meshes.new(meshName)
+ob = bpy.data.objects.new(obName, me)
+ob.location = bpy.context.scene.cursor_location
+bpy.context.scene.objects.link(ob)
+me.from_pydata(vertices,[],faces)      
+me.update(calc_edges=True) 
