@@ -1,22 +1,44 @@
 ## Spherical subdivision
 import math
 import bpy
+import random
 ## spherical coordinates
-anglesub = 100
-Radius  = 1
+anglesub = 250
+Radius  = .02
+Iterations = 2000
+Height = .00001
 
 def distance(coord):
     x,y,z = coord
     return (x*x+y*y+z*z)**.5
+
+def dotproduct(c1,c2):
+    x1,y1,z1 = c1
+    x2,y2,z2 = c2
+    return x1*x2+y1*y2+z1*z2
 
 def norm(coord):
     d = distance(coord)
     x,y,z = coord
     return (x/d,y/d,z/d)
 
+def addvec(v1,v2):
+    x1,y1,z1 = v1
+    x2,y2,z2 = v2
+    return (x1+x2,y1+y2,z1+z2)
+
+def scalemult(sc,v1):
+    x1,y1,z1 = v1
+    return (sc*x1,sc*y1,sc*z1)
+
 def spheretocoord(r,theta,phi):
     return (r*math.cos(theta)*math.sin(phi), r*math.sin(theta)*math.sin(phi),
             r*math.cos(phi))
+
+def randomNormal():
+    theta = random.uniform(0.0,2*math.pi)
+    phi = random.uniform(0.0,2*math.pi)
+    return spheretocoord(1.0,theta,phi)
 
 def buildSphere(Radius, anglesub):
     ## build equitorial subdivision
@@ -161,8 +183,24 @@ def buildSphere(Radius, anglesub):
             faces.append(face)
     
     return vertices, faces
+
                 
 vertices, faces = buildSphere(Radius, anglesub)
+
+i = 0
+while i < Iterations:
+    rN = randomNormal()
+    height = Height*random.random()
+    for vi, vert in enumerate(vertices):
+        vN = norm(vert)
+        if dotproduct(rN,vN) > 0:
+            vheight = scalemult(height,vN)
+            newvec = addvec(vert,vheight)
+        else:
+            vheight = scalemult(-1*height,vN)
+            newvec = addvec(vert,vheight)
+        vertices[vi] = newvec
+    i += 1
 meshName = "Polygon"
 obName = "PolygonObj"
 me = bpy.data.meshes.new(meshName)
