@@ -42,6 +42,19 @@ def lerpcolor(c1, c2, value):
 	
 	return tuple(tcolor)
 
+def getpixel(uvpixcoord ,dimX = dimX, dimY = dimY):
+    px,py = uvpixcoord
+##    px = ux*dimX
+##    py = uy*dimY
+    pyi = py*dimX*4
+    pxi = px*4
+    pix = pyi + pxi
+    return (pix,pix+1,pix+2,pix+3)
+
+def getpixelcoord(uv, dimX = dimX, dimY = dimY):
+    ux,uy = uv
+    return [ux*dimX, uy*dimY]
+
 landlow = (0,64,0)
 landhigh = (116,182,133)
 waterlow = (0,0,55)
@@ -49,8 +62,8 @@ waterhigh = (0,53,106)
 mountlow = (147,157,167)
 mounthigh = (226,223,216)
 
-dimX = 1000
-dimY = 2000
+dimX = 1024
+dimY = 2048
 ## this fills and existing blender image on the uv coordinates only
 ## it leaves non uv coordinate assigned to transparent alpha on non
 ## coordinate assigned pixel areas.
@@ -73,3 +86,49 @@ dimY = 2000
 ## for instance, between two terrain color height cutoff ranges are
 ## then linearly interpolated to determine color mixing between both
 ## such cutoffs.
+
+## Iterate the faces to fill the pixel area
+scn = bpy.context.scene
+scn.objects.active = ob
+ob.select = True
+bpy.ops.object.mode_set(mode = 'EDIT')
+bm = bmesh.from_edit_mesh(ob.data)
+D = bpy.data
+ 
+# BlendDataImages.new(name, width, height, alpha=False, float_buffer=False)
+image_object = D.images.new(name='pixeltest', dimX, dimY)
+for f in bm.faces:
+    verts = []
+    vertmatch = False
+    for l in f.verts:
+        ## get vert index boundaries
+        if l.index in verts:
+            vertmatch = True
+            break
+        verts.append(l.index)
+        
+    ## get uv coord
+    if vertmatch:
+        continue
+    uvcoords = []
+    for vi in verts:
+        vcoord = vcoordtovindexrev[vind]
+        uvcoord = sphereproj[vcoord]
+        uvcoords.append(list(uvcoord))
+    ## get min max coords
+    sortset = uvcoords[0:len(uvcoords)]
+    sortset.sort(key=lambda tup: tup[0])
+    minset = sortset[0:2]
+    maxset = sortset[2:4]
+    minset.sort(key=lambda tup:tup[1])
+    maxset.sort(key=lambda tup:tup[1])
+    minuvcoord = minset[0]
+    maxuvcoord = maxset[1]
+    ## now we convert min max coords to pixel coordinates
+    minpixcoord = getpixelcoord(minuvcoord)
+    maxpixcoord = getpixelcoord(maxuvcoord)
+    ## now we iterate the set of pixels from minpix x to maxpix along x
+    ## and minpix y to maxpix y
+    pixcoord = minpixcoord
+    for j in range(minpixcoord[1],maxpixcoord[1]):
+        for i in range(minpixcoord[0],maxpixcoord[0]):
