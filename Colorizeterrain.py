@@ -142,11 +142,11 @@ for f in bm.faces:
     pixcoord = minpixcoord
     for j in range(minpixcoord[1],maxpixcoord[1]):
         for i in range(minpixcoord[0],maxpixcoord[0]):
-            h = bilinear_interpolation(i, j, points) ## bilinearly interpolated height for uv
+            h = bilinear_interpolation(i, j, uvheights) ## bilinearly interpolated height for uv
             if (h<flood):
-                newcolor=colorlerp(waterlow,waterhigh,h/flood)
+                newcolor=lerpcolor(waterlow,waterhigh,h/flood)
             elif (h>mount):
-                newcolor=colorlerp(mountlow,mounthigh,(h-mount)/(diff-mount))
+                newcolor=lerpcolor(mountlow,mounthigh,(h-mount)/(diff-mount))
             else:
-                newcolor=colorlerp(landlow,landhigh,(h-flood)/(mount-flood));
+                newcolor=lerpcolor(landlow,landhigh,(h-flood)/(mount-flood));
             
