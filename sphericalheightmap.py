@@ -42,12 +42,15 @@ def randomNormal():
 
 def buildSphere(Radius, anglesub):
     ## build equitorial subdivision
+    sphereproj = {}
     thetainc = 2*math.pi/anglesub
     vertices = []
     theta = 0.0
     phi = math.pi/2.0
     for i in range(anglesub+1):
-        vertices.append(spheretocoord(Radius,theta,phi))
+        v = spheretocoord(Radius,theta,phi)
+        vertices.append(v)
+        sphereproj[v] = (theta,phi)
         theta += thetainc
     ## now build positive hemisphere
     evertices = vertices[0:len(vertices)]
@@ -60,12 +63,16 @@ def buildSphere(Radius, anglesub):
         verts = []  ## we build a ordered list as we increment phi of vertices
         if i != int(anglesub/4 ):
             for j in range(anglesub+1):
-                verts.append(spheretocoord(Radius,theta,phi))
+                v = spheretocoord(Radius,theta,phi)
+                verts.append(v)
+                sphereproj[v] = (theta,phi)
                 theta += thetainc
             phi -= thetainc
             vertgroups.append(verts)
         else:
-            verts.append(spheretocoord(Radius,theta,0.0))
+            v = spheretocoord(Radius,theta,0.0)
+            verts.append(v)
+            sphereproj[v] = (theta,0.0)
     ## build the faces and append the vertices
     faces = []
     vcoordtovindex = {}
@@ -124,6 +131,7 @@ def buildSphere(Radius, anglesub):
                 v = spheretocoord(Radius,theta,phi)
                 verts.append(v)
                 vertices.append(v)
+                sphereproj[v] = (theta,phi)
                 vcoordtovindex[v] = len(vertices)-1
                 theta += thetainc
             phi += thetainc
@@ -134,6 +142,7 @@ def buildSphere(Radius, anglesub):
             ##verts.append(spheretocoord(Radius,theta,phi))
             v = spheretocoord(Radius,theta,0.0)
             vertices += [v]
+            sphereproj[v] = (theta,0.0)
             vcoordtovindex[v] = len(vertices)-1
             vertgroups += [[v]]
 ##    newfaces = []
