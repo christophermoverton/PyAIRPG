@@ -1,9 +1,9 @@
 ## Spherical subdivision
 import math
-import bpy
+import bpy,bmesh
 import random
 ## spherical coordinates
-anglesub = 250
+anglesub = 100
 Radius  = .02
 Iterations = 2000
 Height = .00001
@@ -42,6 +42,8 @@ def randomNormal():
 
 def buildSphere(Radius, anglesub):
     ## build equitorial subdivision
+    pi2 = 2*math.pi
+    pi = math.pi
     sphereproj = {}
     thetainc = 2*math.pi/anglesub
     vertices = []
@@ -50,7 +52,7 @@ def buildSphere(Radius, anglesub):
     for i in range(anglesub+1):
         v = spheretocoord(Radius,theta,phi)
         vertices.append(v)
-        sphereproj[v] = (theta,phi)
+        sphereproj[v] = (theta/pi2,phi/pi)
         theta += thetainc
     ## now build positive hemisphere
     evertices = vertices[0:len(vertices)]
@@ -65,7 +67,7 @@ def buildSphere(Radius, anglesub):
             for j in range(anglesub+1):
                 v = spheretocoord(Radius,theta,phi)
                 verts.append(v)
-                sphereproj[v] = (theta,phi)
+                sphereproj[v] = (theta/pi2,phi/pi)
                 theta += thetainc
             phi -= thetainc
             vertgroups.append(verts)
@@ -131,7 +133,7 @@ def buildSphere(Radius, anglesub):
                 v = spheretocoord(Radius,theta,phi)
                 verts.append(v)
                 vertices.append(v)
-                sphereproj[v] = (theta,phi)
+                sphereproj[v] = (theta/pi2,phi/pi)
                 vcoordtovindex[v] = len(vertices)-1
                 theta += thetainc
             phi += thetainc
@@ -140,9 +142,9 @@ def buildSphere(Radius, anglesub):
             vertgroups += [verts]
         else:
             ##verts.append(spheretocoord(Radius,theta,phi))
-            v = spheretocoord(Radius,theta,0.0)
+            v = spheretocoord(Radius,theta,pi)
             vertices += [v]
-            sphereproj[v] = (theta,0.0)
+            sphereproj[v] = (theta/pi2,pi/pi)
             vcoordtovindex[v] = len(vertices)-1
             vertgroups += [[v]]
 ##    newfaces = []
@@ -191,11 +193,11 @@ def buildSphere(Radius, anglesub):
                 ifacerow += 1
             faces.append(face)
     
-    return vertices, faces
+    return vertices, faces, sphereproj, vcoordtovindex
 
                 
-vertices, faces = buildSphere(Radius, anglesub)
-
+vertices, faces, sphereproj, vcoordtovindex = buildSphere(Radius, anglesub)
+heightmap = {} ## vertex index keyed, heightmap valued
 i = 0
 while i < Iterations:
     rN = randomNormal()
@@ -208,8 +210,21 @@ while i < Iterations:
         else:
             vheight = scalemult(-1*height,vN)
             newvec = addvec(vert,vheight)
+        heightmap[vi] = height
+        del vcoordtovindex[vert]
+        scoord = sphereproj[vert]
+        sphereproj[newvec] = scoord
+        del sphereproj[vert]
+        vcoordtovindex[newvec] = vi
         vertices[vi] = newvec
     i += 1
+
+## setreverse index mapping between coordinate to indices
+vcoordtovindexrev = {}
+for vcoord in vcoordtovindex:
+    vi = vcoordtovindex[vcoord]
+    vcoordtovindexrev[vi] = vcoord
+    
 meshName = "Polygon"
 obName = "PolygonObj"
 me = bpy.data.meshes.new(meshName)
@@ -217,4 +232,23 @@ ob = bpy.data.objects.new(obName, me)
 ob.location = bpy.context.scene.cursor_location
 bpy.context.scene.objects.link(ob)
 me.from_pydata(vertices,[],faces)      
-me.update(calc_edges=True) 
+me.update(calc_edges=True)
+## Select the new object in scene and set uvs
+scn = bpy.context.scene
+scn.objects.active = ob
+ob.select = True
+bpy.ops.object.mode_set(mode = 'EDIT')
+bm = bmesh.from_edit_mesh(ob.data)
+uv_layer = bm.loops.layers.uv.verify()
+bm.faces.layers.tex.verify()
+
+for f in bm.faces:
+    for l in f.loops:
+        luv = l[uv_layer]
+        vind = l.vert.index
+        vcoord = vcoordtovindexrev[vind]
+        uvcoord = sphereproj[vcoord]
+        luv.uv = tuple(uvcoord)
+
+bmesh.update_edit_mesh(me)
+bpy.ops.object.mode_set(mode='OBJECT')
