@@ -1,7 +1,7 @@
 import math
 
-dimX = 1024
-dimY = 1024
+dimX = 2048
+dimY = 2048
 colormap = {}
 def bilinear_interpolation(x, y, points):
     '''Interpolate (x,y) from values associated with four points.

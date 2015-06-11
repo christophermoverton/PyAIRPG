@@ -3,9 +3,9 @@ import math
 import bpy,bmesh
 import random
 ## spherical coordinates
-anglesub = 100
+anglesub = 200
 Radius  = .2
-Iterations = 200
+Iterations = 1000
 Height = .0002
 
 def distance(coord):
