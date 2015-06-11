@@ -4,9 +4,9 @@ import bpy,bmesh
 import random
 ## spherical coordinates
 anglesub = 100
-Radius  = .02
-Iterations = 2000
-Height = .00001
+Radius  = .2
+Iterations = 200
+Height = .0002
 
 def distance(coord):
     x,y,z = coord
@@ -208,16 +208,21 @@ while i < Iterations:
     for vi, vert in enumerate(vertices):
         vN = norm(vert)
         if dotproduct(rN,vN) > 0:
+            aheight = height
             vheight = scalemult(height,vN)
             newvec = addvec(vert,vheight)
         else:
+            aheight = -1.0*height
             vheight = scalemult(-1*height,vN)
             newvec = addvec(vert,vheight)
-        heightmap[vi] = height
-        if height > maxheight:
-            maxheight = height
-        if height < minheight:
-            minheight = height
+        if vi in heightmap:
+            heightmap[vi] += aheight
+        else:
+            heightmap[vi] = aheight
+        if heightmap[vi] > maxheight:
+            maxheight = heightmap[vi]
+        if heightmap[vi] < minheight:
+            minheight = heightmap[vi]
         del vcoordtovindex[vert]
         scoord = sphereproj[vert]
         sphereproj[newvec] = scoord

@@ -1,0 +1,16 @@
+Enter for instance these in Python console in Blender shown below:
+
+filename = "/home/strangequark/PyAIRPG/sphericalheightmap.py"
+filename2 = "/home/strangequark/PyAIRPG/Colorizeterrain.py"
+Use bitmap2.py I recommend running this in your regular python 2.xx 
+console (only works with python 2.xx) 
+
+filename3 = "/home/strangequark/PyAIRPG/bitmap2.py"
+
+Then run respectively in sequential order:
+
+exec(compile(open(filename).read(), filename, 'exec'))
+
+and
+
+exec(compile(open(filename2).read(), filename2, 'exec'))

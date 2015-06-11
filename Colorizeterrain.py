@@ -1,4 +1,8 @@
 import math
+
+dimX = 1024
+dimY = 1024
+colormap = {}
 def bilinear_interpolation(x, y, points):
     '''Interpolate (x,y) from values associated with four points.
 
@@ -30,17 +34,15 @@ def bilinear_interpolation(x, y, points):
            ) / ((x2 - x1) * (y2 - y1) + 0.0)
 
 def lerpcolor(c1, c2, value):
-	tcolor = [0,0,0]
-	c1l = list(c1)
-        c2l = list(c2)
-	for g in range(3):
-		if (c1l[g]>c2l[g])
-			tcolor[g]=c2l[g]+(c1l[g]-c2l[g])*value
-
-		else
-			tcolor[g]=c1l[g]+(c2l[g]-c1l[g])*value
-	
-	return tuple(tcolor)
+    tcolor = [0,0,0]
+    c1l = list(c1)
+    c2l = list(c2)
+    for g in range(3):
+        if c1l[g]>c2l[g]:
+            tcolor[g]=c2l[g]+(c1l[g]-c2l[g])*value
+        else:
+            tcolor[g]=c1l[g]+(c2l[g]-c1l[g])*value
+    return tuple(tcolor)
 
 def getpixel(uvpixcoord ,dimX = dimX, dimY = dimY):
     px,py = uvpixcoord
@@ -55,8 +57,13 @@ def getpixelcoord(uv, dimX = dimX, dimY = dimY):
     ux,uy = uv
     return [ux*dimX, uy*dimY]
 
-diff = maxheight-minheight,
-flood=0.5  ## flood plain
+def translatecoords(heights, trns):
+    for index, height in enumerate(heights):
+        heights[index] = [height[0] - trns[0],height[1] - trns[1],height[2]]
+    return heights
+
+diff = abs(maxheight-minheight)
+flood=0.6  ## flood plain
 mount=0.85 ##mountain level
 	
 flood*=diff
@@ -68,8 +75,7 @@ waterhigh = (0,53,106)
 mountlow = (147,157,167)
 mounthigh = (226,223,216)
 
-dimX = 1024
-dimY = 2048
+
 ## this fills and existing blender image on the uv coordinates only
 ## it leaves non uv coordinate assigned to transparent alpha on non
 ## coordinate assigned pixel areas.
@@ -93,6 +99,8 @@ dimY = 2048
 ## for instance, between two terrain color height cutoff ranges are
 ## then linearly interpolated to determine color mixing between both
 ## such cutoffs.
+## color values are assigned in (r,g,b,a) 8-bit channel format
+## or 32 bits RGBA alpha where each channel has 256 integer value ranges
 
 ## Iterate the faces to fill the pixel area
 scn = bpy.context.scene
@@ -103,28 +111,27 @@ bm = bmesh.from_edit_mesh(ob.data)
 D = bpy.data
  
 # BlendDataImages.new(name, width, height, alpha=False, float_buffer=False)
-image_object = D.images.new(name='pixeltest', dimX, dimY)
+##image_object = D.images.new("new",dimX, dimY)
 for f in bm.faces:
-    verts = []
+    nverts = []
     vertmatch = False
     for l in f.verts:
         ## get vert index boundaries
-        if l.index in verts:
+        if l.index in nverts:
             vertmatch = True
             break
-        verts.append(l.index)
-        
+        nverts.append(l.index)    
     ## get uv coord
     if vertmatch:
         continue
     uvcoords = []
     uvheights = []
-    for vi in verts:
-        vcoord = vcoordtovindexrev[vind]
+    for vi in nverts:
+        vcoord = vcoordtovindexrev[vi]
         uvcoord = sphereproj[vcoord]
-        u,v = uvcoord
+        pxc,pyc = getpixelcoord(uvcoord)
         uvcoords.append(list(uvcoord))
-        uvheights.append([u,v,heightmap[vi]])
+        uvheights.append([pxc,pyc,heightmap[vi]])
     ## get min max coords
     sortset = uvcoords[0:len(uvcoords)]
     sortset.sort(key=lambda tup: tup[0])
@@ -137,16 +144,59 @@ for f in bm.faces:
     ## now we convert min max coords to pixel coordinates
     minpixcoord = getpixelcoord(minuvcoord)
     maxpixcoord = getpixelcoord(maxuvcoord)
+    ## to use a translation shift factor ans so scale so that we can properly
+    ## compute heighmap values
+##    minx,miny = minpixcoord
+##    maxx,maxy = maxpixcoord
+##    trnsx = minx - int(minx)
+##    trnsy = miny - int(miny)
+##    trns = (trnsx,trnsy)
+##    uvheights = translatecoords(uvheights, trns)
+##    minpixcoord = (minx-transx, miny-transy)
+##    maxpixcoord = (maxx-transx, maxy-transy)
+##    ## now compute scale factor from maxcoord
+##    if int(maxy) != int(maxpixcoord[1]):
+        
     ## now we iterate the set of pixels from minpix x to maxpix along x
     ## and minpix y to maxpix y
     pixcoord = minpixcoord
-    for j in range(minpixcoord[1],maxpixcoord[1]):
-        for i in range(minpixcoord[0],maxpixcoord[0]):
-            h = bilinear_interpolation(i/dimX, j/dimY, uvheights) ## bilinearly interpolated height for uv
+    startx = None
+    starty = None
+    difx = minpixcoord[0] - int(minpixcoord[0])
+    if difx == 0.0:
+        startx = int(minpixcoord[0])
+    else:
+        startx = int(minpixcoord[0])+1
+    dify = minpixcoord[1] - int(minpixcoord[1])
+    if dify == 0.0:
+        starty = int(minpixcoord[1])
+    else:
+        starty = int(minpixcoord[1])+1
+    for j in range(starty,int(maxpixcoord[1])+1):
+        for i in range(startx,int(maxpixcoord[0])+1):
+##            print(float(i))
+##            print(float(j))
+##            print(uvheights)
+            h = bilinear_interpolation(float(i),
+                                       float(j), uvheights) ## bilinearly interpolated height for uv
+            h += -1*minheight
             if (h<flood):
                 newcolor=lerpcolor(waterlow,waterhigh,h/flood)
             elif (h>mount):
                 newcolor=lerpcolor(mountlow,mounthigh,(h-mount)/(diff-mount))
             else:
-                newcolor=lerpcolor(landlow,landhigh,(h-flood)/(mount-flood));
+                newcolor=lerpcolor(landlow,landhigh,(h-flood)/(mount-flood))
+            ## assign the newcolor to the blender image pixel indices per channel
+            r,g,b = newcolor
             
+            ##rchi,gchi,bchi,achi = getpixel((i,j))
+            colormap[(i,j)] = (r,g,b)
+##            image_object.pixels[rchi] = (r/255.0)
+##            image_object.pixels[gchi] = (g/255.0)
+##            image_object.pixels[bchi] = (b/255.0)
+##            image_object.pixels[achi] = (1.0)
+            ## that should be it!
+filename = "/home/strangequark/colormap.txt"
+out = open(filename, 'w')
+out.write(str(colormap))
+out.close()
