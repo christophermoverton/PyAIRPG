@@ -35,6 +35,11 @@ strat = []
 for i in range(100):
     strat.append(1.0)
 civtoincome[5] = strat
+##chief and warrior/hunter/mixed role occupation civ type 1
+##civ type 2 peasant/clergy/nobility
+## civ type 3 property based classes.  For example, Roman classification gives
+## 3 other unspecified classes, proletarii, equites, senatores
+
 
 def buildCharacter(sex = None, clas = None, profession = None,
                    age = None, parent = None,
@@ -52,4 +57,5 @@ def buildCharacter(sex = None, clas = None, profession = None,
             sex = 2
     if parent == None:
         pr = random.random()
+    
         

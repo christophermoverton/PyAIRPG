@@ -3,6 +3,56 @@ import math
 dimX = 2048
 dimY = 2048
 colormap = {}
+
+def addLandmaposition(pos,landmap,landmaprev):
+    ##check positions
+    ##checking neighboring heightmap pixels assigned to landmap.
+    ##It is assumed the first pixel neighbor check means that a unassigned
+    ## heightmap pixel has not been assigned, but all checks thereafter do
+    ## not have this reliant assumption.  If an assignment has taken place
+    ## already then we check to see if landmap assignment is the same
+    ## as the checked position if it isn't the we aggregate the data
+    ## landmap set of the old and new positions.
+    ## if nothing has been assigned then we assign the position a new landmap
+    ## identifier.  This builds contiguous landspace assignments, delineating
+    ## distinct islands and continents.
+    ## landmap identifier 0 is reserved for indexing
+    x,y = pos
+    ne = (x+1,y+1)
+    n = (x,y+1)
+    nw = (x-1,y+1)
+    w = (x-1,y)
+    e = (x+1,y)
+    se = (x+1,y-1)
+    sw = (x-1,y-1)
+    assigned = False
+    if ne in landmaprev:
+        landmaprev[pos] = landmaprev[ne]
+        landmap[landmaprev[pos]].append(pos)
+        assigned = True
+    dset = [n,nw,w,e,se,sw]
+    for d in dset:
+        if d in landmaprev:
+            if assigned:
+                if landmaprev[d] != landmaprev[pos]:
+                    posset = landmap[landmaprev[pos]]
+                    posset = posset[0:len(posset)]
+                    landmap[landmaprev[d]] += posset
+                    for npos in posset:
+                        landmaprev[npos] = landmaprev[d]
+                    del landmap[landmaprev[pos]]
+            else:
+                landmaprev[pos] = landmaprev[d]
+                landmap[landmaprev[pos]].append(pos)
+                assigned = True
+    if not assigned:
+        lident = landmap[0]
+        lident += 1
+        landmaprev[pos] = lident
+        landmap[lident] = [pos]
+        landmap[0] = lident
+    
+    
 def bilinear_interpolation(x, y, points):
     '''Interpolate (x,y) from values associated with four points.
 
