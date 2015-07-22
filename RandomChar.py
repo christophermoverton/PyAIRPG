@@ -38,7 +38,7 @@ civtoincome[5] = strat
 ##chief and warrior/hunter/mixed role occupation civ type 1
 ##civ type 2 peasant/clergy/nobility
 ## civ type 3 property based classes.  For example, Roman classification gives
-## 3 other unspecified classes, proletarii, equites, senatores
+## 3 other unspecified classes, proletarii, equites, senatores.  
 
 
 def buildCharacter(sex = None, clas = None, profession = None,

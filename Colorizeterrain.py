@@ -1,9 +1,76 @@
 import math
-
+global dimX,dimY, NORMFAC
+NORMFAC = 1
 dimX = 2048
 dimY = 2048
 colormap = {}
 
+def clamp (val):
+	if val > 1.0:
+            return 1.0
+	elif val < 0.0:
+	    return 0.0
+	else:
+	    return val
+
+def normalize(vec):
+    x,y,z = vec
+    d = (x*x+y*y+z*z)**.5
+    return (x/d,y/d,z/d)
+
+def computeGrad(heightmap, normalmap):
+    for i in range(dimX):
+        for j in range(dimY):
+            if i < dimX-1:
+                ival = i+1
+            else:
+                ival = i
+            jval = j
+            
+            if i == dimX-1:
+                ival2 = i-1
+            else:
+                ival2 = i
+            t1 = (ival,jval) in heightmap
+            t2 = (ival2,jval) in heightmap
+            if not t1 or not t2:
+                continue
+            sx = heightmap[(ival,jval)] - heightmap[(ival2,jval)]
+            if i == 0 or i == dimX-1:
+                sx *= 2
+            if j < dimY-1:
+                jval = j+1
+            else:
+                jval = j
+            ival = i
+            
+            if j == dimY-1:
+                jval2 = j-1
+            else:
+                jval2 = j
+            t1 = (ival,jval) in heightmap
+            t2 = (ival,jval2) in heightmap
+            if not t1 or not t2:
+                    continue
+            sy = heightmap[(ival,jval)] - heightmap[(ival,jval2)]
+            if j == 0 or j == dimY-1:
+                sy *= 2
+            vec = (-1.0*NORMFAC*sx, -1.0*NORMFAC*sy, .1)
+            vec = normalize(vec)
+##            vx,vy,vz = vec
+##            vec = (vx/2+.5,vy/2+.5, vz/2+.5)
+##            vec = vec/2.0 + .5
+            normalmap[(i,j)] = vec
+##    double sx = (*heightmap)[terr::Coordpair(x<xzScale-1 ? (double)(x+1) : (double)x, (double)y)] - 
+##                        (*heightmap)[terr::Coordpair(x == x0 ? (double)(x-1) : (double)x, (double)y)];
+##    if (x == 0 || x == xzScale - 1){ sx *= 2;}
+##    double sy = (*heightmap)[terr::Coordpair(x, y < xzScale-1 ? (double)(y+1) : (double)y)] - 
+##                        (*heightmap)[terr::Coordpair(x, y == y0 ? (double)(y-1) : (double)y)];
+##    if (y == 0 || y == xzScale -1) {sy *= 2;}
+##    TPoint3 * vec = new TPoint3(-1.0f*normfac*sx, -1.0f*normfac*sy, 0.1f);
+##    //TPoint3 * vec = new TPoint3(sx*yScale, 0.0f, sy*yScale);  //changing -sx, 2*xzScale mid term ??!
+##    (*vec) = (*vec).normalize()
+            
 def addLandmaposition(pos,landmap,landmaprev):
     ##check positions
     ##checking neighboring heightmap pixels assigned to landmap.
@@ -25,12 +92,13 @@ def addLandmaposition(pos,landmap,landmaprev):
     e = (x+1,y)
     se = (x+1,y-1)
     sw = (x-1,y-1)
+    s = (x,y-1)
     assigned = False
     if ne in landmaprev:
         landmaprev[pos] = landmaprev[ne]
         landmap[landmaprev[pos]].append(pos)
         assigned = True
-    dset = [n,nw,w,e,se,sw]
+    dset = [n,nw,w,e,se,sw,s]
     for d in dset:
         if d in landmaprev:
             if assigned:
@@ -38,9 +106,13 @@ def addLandmaposition(pos,landmap,landmaprev):
                     posset = landmap[landmaprev[pos]]
                     posset = posset[0:len(posset)]
                     landmap[landmaprev[d]] += posset
+                    del landmap[landmaprev[pos]]
                     for npos in posset:
                         landmaprev[npos] = landmaprev[d]
-                    del landmap[landmaprev[pos]]
+##                        print(npos)
+##                        print(landmaprev[npos])
+##                        print(landmaprev[d])
+                    
             else:
                 landmaprev[pos] = landmaprev[d]
                 landmap[landmaprev[pos]].append(pos)
@@ -124,6 +196,9 @@ waterlow = (0,0,55)
 waterhigh = (0,53,106)
 mountlow = (147,157,167)
 mounthigh = (226,223,216)
+landmap = {}
+landmaprev = {}
+landmap[0] = 1
 
 
 ## this fills and existing blender image on the uv coordinates only
@@ -162,6 +237,9 @@ D = bpy.data
  
 # BlendDataImages.new(name, width, height, alpha=False, float_buffer=False)
 ##image_object = D.images.new("new",dimX, dimY)
+heights = {}
+heightmap2 = {}
+normalmap = {}
 for f in bm.faces:
     nverts = []
     vertmatch = False
@@ -230,17 +308,38 @@ for f in bm.faces:
             h = bilinear_interpolation(float(i),
                                        float(j), uvheights) ## bilinearly interpolated height for uv
             h += -1*minheight
-            if (h<flood):
-                newcolor=lerpcolor(waterlow,waterhigh,h/flood)
-            elif (h>mount):
-                newcolor=lerpcolor(mountlow,mounthigh,(h-mount)/(diff-mount))
-            else:
-                newcolor=lerpcolor(landlow,landhigh,(h-flood)/(mount-flood))
-            ## assign the newcolor to the blender image pixel indices per channel
-            r,g,b = newcolor
-            
-            ##rchi,gchi,bchi,achi = getpixel((i,j))
-            colormap[(i,j)] = (r,g,b)
+            heightmap2[(i,j)] = h
+computeGrad(heightmap2, normalmap)
+for j in range(dimY):
+    for i in range(dimX):
+        if not (i,j) in normalmap:
+                continue
+        x,y,z = normalmap[(i,j)]
+        if not (i,j) in heightmap2:
+                continue
+        h = heightmap2[(i,j)]
+        dw = (1.0-(z*z))**.5 ## //normals weighting when normal is positive z then 0 normal weight
+        dw = clamp(dw)            
+        if (h<flood):
+            newcolor=lerpcolor(waterlow,waterhigh,h/flood)
+
+            newcolor2 = lerpcolor(waterlow,waterhigh,dw)
+            newcolor = lerpcolor(newcolor,newcolor2,.5)
+        elif (h>mount):
+            newcolor=lerpcolor(mountlow,mounthigh,(h-mount)/(diff-mount))
+            addLandmaposition((i,j),landmap,landmaprev)
+            newcolor2 = lerpcolor(mountlow,mounthigh,dw)
+            newcolor = lerpcolor(newcolor,newcolor2,.5)                
+        else:
+            newcolor=lerpcolor(landlow,landhigh,(h-flood)/(mount-flood))
+            addLandmaposition((i,j),landmap,landmaprev)
+            newcolor2 = lerpcolor(landlow,landhigh,dw)
+            newcolor = lerpcolor(newcolor,newcolor2,.5)
+        ## assign the newcolor to the blender image pixel indices per channel
+        r,g,b = newcolor
+        
+        ##rchi,gchi,bchi,achi = getpixel((i,j))
+        colormap[(i,j)] = (r,g,b)
 ##            image_object.pixels[rchi] = (r/255.0)
 ##            image_object.pixels[gchi] = (g/255.0)
 ##            image_object.pixels[bchi] = (b/255.0)
@@ -250,3 +349,6 @@ filename = "/home/strangequark/colormap.txt"
 out = open(filename, 'w')
 out.write(str(colormap))
 out.close()
+for cont in landmap:
+    if cont != 0:
+        print('Area of ', cont, ' equals: ', len(landmap[cont]))
