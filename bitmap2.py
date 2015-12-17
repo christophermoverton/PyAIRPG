@@ -1,7 +1,7 @@
 
 import struct
-hgrid = 2048
-vgrid = 2048
+hgrid = 1024
+vgrid = 1024
 filename = "/home/strangequark/testfile.bmp"
 filename2 = "/home/strangequark/colormap.txt"
 inp = open(filename2, 'r')

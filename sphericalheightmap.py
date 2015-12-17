@@ -7,6 +7,7 @@ anglesub = 100
 Radius  = .2
 Iterations = 1000
 Height = .0001
+invthetainc = (anglesub/2*math.pi)
 
 def distance(coord):
     x,y,z = coord

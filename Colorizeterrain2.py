@@ -1,34 +1,35 @@
 import math
 global dimX,dimY, NORMFAC
-BICUBIC = False
+BICUBIC = True
 NORMFAC = 1
 dimX = 2048
 dimY = 2048
 colormap = {}
 
 def cubicInterpolate (p,x):
-    return p[1]+.5*x*(-1.0*p[0]+p[2])+x*x*(p[0]-5.0/2.0*p[1]+2.0*p[2]-.5*p[3])+x*x*x*(-.5*p[0]+1.5*p[1]-1.5*p[2]+.5*p[3])
+	return p[1]+.5*x*(-1.0*p[0]+p[2])+x*x*(p[0]-5.0/2.0*p[1]+2.0*p[2]-.5*p[3])+x*x*x*(-.5*p[0]+1.5*p[1]-1.5*p[2]+.5*p[3])
 
 
 def bicubicInterpolate (p,x,y):
-    arr = []
-    for i in range(4):
-                v = []
-                v.append(p[i][0])
-                v.append(p[i][1])
-                v.append(p[i][2])
-                v.apppend(p[i][3])
-                arr.append(cubicInterpolate(v,y))
-    
-    return cubicInterpolate(arr, x)
+	arr = []
+	for i in range(4):
+	   v = []
+	   v[0].append(p[i][0])
+           v[1].append(p[i][1])
+           v[2].append(p[i][2])
+           v[3].apppend(p[i][3])
+
+	   arr[i].append(cubicInterpolate(v,y))
+	
+	return cubicInterpolate(arr, x)
 
 def clamp (val):
-    if val > 1.0:
+	if val > 1.0:
             return 1.0
-    elif val < 0.0:
-        return 0.0
-    else:
-        return val
+	elif val < 0.0:
+	    return 0.0
+	else:
+	    return val
 
 def normalize(vec):
     x,y,z = vec
@@ -204,7 +205,7 @@ def translatecoords(heights, trns):
 diff = abs(maxheight-minheight)
 flood=0.6  ## flood plain
 mount=0.85 ##mountain level
-    
+	
 flood*=diff
 mount*=diff
 landlow = (0,64,0)
@@ -278,6 +279,8 @@ for f in bm.faces:
         vcoord = vcoordtovindexrev[vi]
         uvcoord = sphereproj[vcoord]
         pxc,pyc = getpixelcoord(uvcoord)
+        pxc = pxc*invthetainc
+        pyc = pyc*invthetainc
         uvcoords.append(list(uvcoord))
         uvheights.append([pxc,pyc,heightmap[vi]])
         pixheightmap[(pxc,pyc)] = heightmap[vi]
@@ -325,70 +328,75 @@ for f in bm.faces:
         starty = int(minpixcoord[1])
     else:
         starty = int(minpixcoord[1])+1
-    for j in range(starty,int(maxpixcoord[1])+1):
-        for i in range(startx,int(maxpixcoord[0])+1):
-##            print(float(i))
-##            print(float(j))
-##            print(uvheights)
-            if not BICUBIC:
-                h = bilinear_interpolation(float(i),
-                                           float(j), uvheights) ## bilinearly interpolated height for uv
-                h += -1*minheight
-                heightmap2[(i,j)] = h
-            else:
-                print('Not there yet.')
-##                x = i 
-##                y = j 
-####                ///*         
-####                //int p0x = ((x == size ? (int)x - 1 : (int)x); int p0y = ((y == size ? (int)y - 1 : (int)y);
-##                p1x = x
-##                p1y = y
-##                locx = x -p1x; double locy = y-p1y;
-####                //int p1x = ((x == size ? (int)x : (int)x + 1); int p1y = ((y == size ? (int)y : (int)y + 1); 
-##                p2x = x+1
-##                p2y = y+1
-##                if x <= 0:
-##                        p0x = p1x
-##                else:
-##                        p0x = p1x-1
-##                if y <= 0:
-##                        p0y = p1y
-##                else:
-##                        p0y = p1y-1
-##                ##p0x = (x <= 0 ? p1x : p1x-1); int p0y = (y <= 0 ? p1y : p1y-1);
-##                if x >= dimX:
-##                        p3x = p2x
-##                else:
-##                        p3x = p2x+1
-##                if y >= dimY:
-##                        p3y = p2y
-##                else:
-##                        p3y = p2y+1
-####                int p3x = (x >= (size-2.0f) ? p2x : p2x+1); int p3y = (y >= (size-2.0f) ? p2y : p2y+1);
-##                p00 = (p0x,p0y); p01 = (p0x,p1y); p02 = (p0x,p2y); p03 = (p0x,p3y);
-##      p10 = (p1x,p0y); p11 = (p1x,p1y); p12 = (p1x,p2y); p13 = (p1x,p3y);
-##                p20 = (p2x,p0y); p21 = (p2x,p1y); p22 = (p2x,p2y); p23 = (p2x,p3y);
-##                p30 = (p3x,p0y); p31 = (p3x,p1y); p32 = (p3x,p2y); p33 = (p3x,p3y);
-##                a = [[],[],[],[]]
-##                t1 = p00 in heightmap; t2 = p01 in heightmap; t3 = p02 in heightmap;
-##                t4 = p03 in heightmap; t5 = p10 in heightmap; t6 = p11 in heightmap;
-##                t7 = p12 in heightmap; t8 = p13 in heightmap; t9 = p20 in heightmap;
-##                t10 = p21 in heightmap; t11 = p22 in heightmap; t12 = p23 in heightmap;
-##                t13 = p30 in heightmap; t14 = p31 in heightmap; t15 = p32 in heightmap;
-##                t16 = p33 in heightmap;
-##                t17 = not t1 or not t2 or not t3 or not t4 or not t5 or not t6 or not t7 or not t8
-##                t18 = not t9 or not t10 or not t11 or not t12 or not t13 or not t14 or not t15 or not t16
-##                if t17 or t18:
-##                        continue
-##                else:
-##          a[0][0] = heightmap2[p00]; a[0][1] = heightmap[p01]; 
-##          a[0][2] = heightmap2[(*p02)]; a[0][3] = (*heightmap)[(*p03)]; 
-##          a[1][0] = (*heightmap)[(*p10)]; a[1][1] = (*heightmap)[(*p11)]; 
-##          a[1][2] = (*heightmap)[(*p12)]; a[1][3] = (*heightmap)[(*p13)];
-##          a[2][0] = (*heightmap)[(*p20)]; a[2][1] = (*heightmap)[(*p21)]; 
-##          a[2][2] = (*heightmap)[(*p22)]; a[2][3] = (*heightmap)[(*p23)];
-##          a[3][0] = (*heightmap)[(*p30)]; a[3][1] = (*heightmap)[(*p31)]; 
-##          a[3][2] = (*heightmap)[(*p32)]; a[3][3] = (*heightmap)[(*p33)];                        
+    if not BICUBIC: 
+            for j in range(starty,int(maxpixcoord[1])+1):
+                for i in range(startx,int(maxpixcoord[0])+1):
+        ##            print(float(i))
+        ##            print(float(j))
+        ##            print(uvheights)
+##                    if not BICUBIC:
+                    h = bilinear_interpolation(float(i),
+                                               float(j), uvheights) ## bilinearly interpolated height for uv
+                    h += -1*minheight
+                    heightmap2[(i,j)] = h
+    else:
+            for j in range(0, int(maxpxy)):
+                    for i in range(0, int(maxpxx)):
+                            
+
+                    else:
+                        x = i 
+                        y = j	
+        ##                ///*		 
+        ##                //int p0x = ((x == size ? (int)x - 1 : (int)x); int p0y = ((y == size ? (int)y - 1 : (int)y);
+                        p1x = x
+                        p1y = y
+                        locx = x -p1x; double locy = y-p1y;
+        ##                //int p1x = ((x == size ? (int)x : (int)x + 1); int p1y = ((y == size ? (int)y : (int)y + 1); 
+                        p2x = x+1
+                        p2y = y+1
+                        if x <= 0:
+                                p0x = p1x
+                        else:
+                                p0x = p1x-1
+                        if y <= 0:
+                                p0y = p1y
+                        else:
+                                p0y = p1y-1
+                        ##p0x = (x <= 0 ? p1x : p1x-1); int p0y = (y <= 0 ? p1y : p1y-1);
+                        if x >= dimX:
+                                p3x = p2x
+                        else:
+                                p3x = p2x+1
+                        if y >= dimY:
+                                p3y = p2y
+                        else:
+                                p3y = p2y+1
+        ##                int p3x = (x >= (size-2.0f) ? p2x : p2x+1); int p3y = (y >= (size-2.0f) ? p2y : p2y+1);
+                        p00 = (p0x,p0y); p01 = (p0x,p1y); p02 = (p0x,p2y); p03 = (p0x,p3y);
+                        p10 = (p1x,p0y); p11 = (p1x,p1y); p12 = (p1x,p2y); p13 = (p1x,p3y);
+                        p20 = (p2x,p0y); p21 = (p2x,p1y); p22 = (p2x,p2y); p23 = (p2x,p3y);
+                        p30 = (p3x,p0y); p31 = (p3x,p1y); p32 = (p3x,p2y); p33 = (p3x,p3y);
+                        a = [[],[],[],[]]
+                        t1 = p00 in heightmap; t2 = p01 in heightmap; t3 = p02 in heightmap;
+                        t4 = p03 in heightmap; t5 = p10 in heightmap; t6 = p11 in heightmap;
+                        t7 = p12 in heightmap; t8 = p13 in heightmap; t9 = p20 in heightmap;
+                        t10 = p21 in heightmap; t11 = p22 in heightmap; t12 = p23 in heightmap;
+                        t13 = p30 in heightmap; t14 = p31 in heightmap; t15 = p32 in heightmap;
+                        t16 = p33 in heightmap;
+                        t17 = not t1 or not t2 or not t3 or not t4 or not t5 or not t6 or not t7 or not t8
+                        t18 = not t9 or not t10 or not t11 or not t12 or not t13 or not t14 or not t15 or not t16
+                        if t17 or t18:
+                                continue
+                        else:
+                                a[0][0] = heightmap2[p00]; a[0][1] = heightmap[p01]; 
+                                a[0][2] = heightmap2[(*p02)]; a[0][3] = (*heightmap)[(*p03)]; 
+                                a[1][0] = (*heightmap)[(*p10)]; a[1][1] = (*heightmap)[(*p11)]; 
+                                a[1][2] = (*heightmap)[(*p12)]; a[1][3] = (*heightmap)[(*p13)];
+                                a[2][0] = (*heightmap)[(*p20)]; a[2][1] = (*heightmap)[(*p21)]; 
+                                a[2][2] = (*heightmap)[(*p22)]; a[2][3] = (*heightmap)[(*p23)];
+                                a[3][0] = (*heightmap)[(*p30)]; a[3][1] = (*heightmap)[(*p31)]; 
+                                a[3][2] = (*heightmap)[(*p32)]; a[3][3] = (*heightmap)[(*p33)];                        
 computeGrad(heightmap2, normalmap)
 for j in range(dimY):
     for i in range(dimX):
