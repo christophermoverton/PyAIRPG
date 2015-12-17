@@ -8,7 +8,7 @@ dimX = 1024
 dimY = 1024
 colormap = {}
 nsize = 100.0 ## ranges from .01 to 10000 (used in fractalizing terrain coloring)
-nsize2 = 20.0
+nsize2 = 40.0
 nbasis = 3 ## default 0 for Blender
 nbasis2 = 3
 rseed = 201
@@ -352,7 +352,7 @@ Scalefy = dimY/abs(maxvcoy - minvcoy)
 trf = [trfacx,trfacy]
 scf = [Scalefx,Scalefy]
 normdiff = maxnormz - minnormz
-normcutoff = minnormz + .7*normdiff  ## you can increase or decrease 2nd term
+normcutoff = minnormz + .4*normdiff  ## you can increase or decrease 2nd term
                                     ## to change width of rock banding
 
 diff = abs(hmax-hmin)
@@ -578,10 +578,18 @@ for j in range(dimY):
 ##                                         (h-flood)/(mount-flood))
                     newcolor4 = lerpcolor(rock,dark_rock,
                                          (maxnormz-z)/(maxnormz-normcutoff))
-                    newcolor5 = lerpcolor(newcolor2,newcolor,.5)
+                    newcolor5 = lerpcolor(newcolor3,newcolor4,.5)
                     ## feathering color
                     ncdiff = (z-normcutoff)/(maxnormz-normcutoff)
-                    newcolor = lerpcolor(newcolor,newcolor5,1-ncdiff)
+                    if ncdiff < 0:
+                            print(ncdiff)
+                    ## using 3rd degree polynomial for falloff
+                    ## -83.3021 x^3-72.8482 x^2+18.1178 x
+                    if ncdiff >.1:
+                            gval3 = 1
+                    else:
+                            gval3 = -83.3021*ncdiff*ncdiff*ncdiff - 72.8482*ncdiff*ncdiff+18.1178*ncdiff
+                    newcolor = lerpcolor(newcolor,newcolor5,1-gval3)
                     
 ##                    newcolor = lerpcolor(dark_rock,rock,(h-flood)/(mount-flood))
         ## assign the newcolor to the blender image pixel indices per channel
