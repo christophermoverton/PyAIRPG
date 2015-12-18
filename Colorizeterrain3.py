@@ -1,18 +1,36 @@
 import math
 import random
 import bpy,bmesh
+from mathutils import *
+from mathutils.noise import *
+from math import *
 global dimX,dimY, NORMFAC
 BICUBIC = False ## don't make True not enabled at the moment
 NORMFAC = 1
 dimX = 1024
 dimY = 1024
 colormap = {}
-nsize = 100.0 ## ranges from .01 to 10000 (used in fractalizing terrain coloring)
+nsize = 200.0 ## ranges from .01 to 10000 (used in fractalizing terrain coloring)
 nsize2 = 40.0
+nsize3 = 40.0 ## high water fractal texturing
 nbasis = 3 ## default 0 for Blender
 nbasis2 = 3
+nbasis3 = 3
 rseed = 201
 featherstepval = .01
+## table of cubic falloff polys (given with coefficients)
+## starting point is (0,0) end point is (cf_key,1)
+cf = {.05:[-4384.9,75.6728,27.1786,-1.11022e-16],
+.1:[-83.3021,-72.8482,18.1178,0.0],
+.2:[-87.1624,15.5496, 5.37658,2.22045e-16],
+.3:[-19.0496,1.63399,4.5576,0.0],
+.4:[-2.99053,-3.03613,4.19294,-2.22045e-16],
+.5:[0.646465,-4.49285,4.08481,-2.22045e-16],
+.6:[1.60934,-4.94142,4.05216,0.0],
+.7:[2.32556,-5.33564,4.02399,0.0]}
+CFK1 = .3
+CFK2 = .1
+
 ## are the basis types:  
 ##("0","Blender","Blender"),
 ##                ("1","Perlin","Perlin"),
@@ -26,14 +44,17 @@ featherstepval = .01
 ##                ("9","Cellnoise","Cellnoise")]
 lacunarity = 2.1 ## default is 2 with min = .01 to max = 6.0
 lacunarity2 = 2.2
+lacunarity3 = 2.1
 depth = 10.0 ## min =1 to max =16 default 6 number of fbm frequencies
 ## this is the frequency of fractional brownian motion (important fractalizing
 ## characteristic).
 depth2 = 10.0
+depth3 = 10.0
 dimension = 1.0 ## min = .01 to max = 2.0 default 1.0 fractal dimension
 ## of the roughest areas
     # origin
-dimension2 = 1.0
+dimension2 = 1.1
+dimension3 = 1.1
 if rseed == 0:
      origin = 0.0,0.0,0.0
      origin_x = 0.0
@@ -228,6 +249,20 @@ def lerpcolor(c1, c2, value):
             tcolor[g]=c1l[g]+(c2l[g]-c1l[g])*value
     return tuple(tcolor)
 
+def lerpcolor2(c1, c2, value):
+     ## this function does not order function operations on channel weighting
+     ## rather is ordered on function operations purely on input ordering
+    tcolor = [0,0,0]
+    c1l = list(c1)
+    c2l = list(c2)
+    for g in range(3):
+        tcolor[g]=c1l[g]+(c2l[g]-c1l[g])*value
+        if  0 > tcolor[g]:
+             tcolor[g] = 0
+        if tcolor[g] > 255:
+             tcolor[g] = 255
+    return tuple(tcolor)
+
 def getpixel(uvpixcoord ,dimX = dimX, dimY = dimY):
     px,py = uvpixcoord
 ##    px = ux*dimX
@@ -351,16 +386,22 @@ Scalefx = dimX/abs(maxvcox - minvcox)
 Scalefy = dimY/abs(maxvcoy - minvcoy)
 trf = [trfacx,trfacy]
 scf = [Scalefx,Scalefy]
-normdiff = maxnormz - minnormz
-normcutoff = minnormz + .4*normdiff  ## you can increase or decrease 2nd term
-                                    ## to change width of rock banding
-
+normdiff = abs(maxnormz - minnormz)
+cscale = .1
+if minnormz < 0 and maxnormz < 0:
+     normcutoff = minnormz + cscale*normdiff  ## you can increase or decrease 2nd term to change width of rock banding
+     NORM = 0
+else:
+     normcutoff = maxnormz - cscale*normdiff
+     NORM = 1
 diff = abs(hmax-hmin)
-flood=0.001  ## flood plain
+flood=0.01  ## flood plain
 mount=0.50 ##mountain level
 	
 flood*=diff
 mount*=diff
+flood+=hmin
+mount+=hmin
 landlow = (0,64,0)
 landhigh = (116,182,133)
 landlow_rock = (82,87,81)
@@ -370,7 +411,9 @@ landhigh_rock2 = (87,83,71)
 landlow_dirt = (156,158,104)
 landhigh_dirt = (199,201,135)
 waterlow = (0,0,55)
+waterlow2 = (162,164,245)
 waterhigh = (0,53,106)
+waterhigh2 = (164,232,139)
 mountlow = (147,157,167)
 mounthigh = (226,223,216)
 rock = (145,148,141)
@@ -520,6 +563,7 @@ for f in bm.faces:
 ##			a[3][0] = (*heightmap)[(*p30)]; a[3][1] = (*heightmap)[(*p31)]; 
 ##			a[3][2] = (*heightmap)[(*p32)]; a[3][3] = (*heightmap)[(*p33)];                        
 ##computeGrad(heightmap2, normalmap)
+gval5 = 0
 for j in range(dimY):
     for i in range(dimX):
         if not (i,j) in normalmap:
@@ -532,28 +576,39 @@ for j in range(dimY):
         dw = (1.0-(z*z))**.5 ## //normals weighting when normal is positive z then 0 normal weight
         dw = clamp(dw)            
         if (h<flood):
-            newcolor=lerpcolor(waterlow,waterhigh,h/flood)
+            ncoords3 = (i /nsize3 + origin_x, j/ nsize3 + origin_y,
+                        0.0 + origin_z)
+            gval6 = fractal(ncoords3,dimension3,lacunarity3,depth3,nbasis3)
+            gval6 += 1
+            gval6 *= .5
+            gval6 = clamp(gval6)
+            newcolorl = lerpcolor(waterlow,waterlow2,gval6)
+            newcolorh = lerpcolor(waterhigh,waterhigh2,gval6)
+            newcolor=lerpcolor(newcolorl,newcolorh,h/flood)
 
             newcolor2 = lerpcolor(waterlow,waterhigh,dw)
             newcolor = lerpcolor(newcolor,newcolor2,.5)
         elif (h>mount):
-            newcolor=lerpcolor(mountlow,mounthigh,(h-mount)/(diff-mount))
+            newcolor=lerpcolor(mountlow,mounthigh,(h-mount)/(hmax-mount))
             addLandmaposition((i,j),landmap,landmaprev)
-            newcolor2 = lerpcolor(mountlow,mounthigh,dw)
+            newcolor2 = lerpcolor(mountlow,mounthigh,(z-minnormz)/(normdiff))
             newcolor = lerpcolor(newcolor,newcolor2,.5)                
         else:
             ncoords = ( i / nsize + origin_x, j / nsize+origin_y,
                         0.0 + origin_z )
             ncoords2 = (i /nsize2 + origin_x, j/ nsize2 + origin_y,
                         0.0 + origin_z)
+
             gval = fractal(ncoords, dimension, lacunarity, depth, nbasis )
             gval2 = fractal(ncoords2,dimension2,lacunarity2,depth2,nbasis2)
+
             ## gval gradient value is returned from -1 to 1
             ## need to shift and rescale to 0 to 1
             gval += 1
             gval *= .5
             gval2 += 1
             gval2 *= .5
+
 ##            if random.random() > .5:
             landlow_n = lerpcolor(landlow_dirt,landlow,gval)
             landhigh_n = lerpcolor(landhigh_dirt,landhigh,gval)
@@ -566,9 +621,17 @@ for j in range(dimY):
             addLandmaposition((i,j),landmap,landmaprev)
 ##            newcolor2 = lerpcolor(landlow,landhigh,dw)
             newcolor2 = lerpcolor(dark_grass,light_grass,
-                                  (z-minnormz)/(minnormz-normcutoff))
-            newcolor = lerpcolor(newcolor,newcolor2,.85)
-            if z >= normcutoff:
+                                  (z-minnormz)/(normdiff))
+            newcolor = lerpcolor(newcolor,newcolor2,.3)
+            if NORM:
+                 testc = z <= normcutoff
+                 ratioc = abs((z-minnormz)/(minnormz - normcutoff))
+                 rncdiff = abs((z-normcutoff)/(minnormz - normcutoff))
+            else:
+                 testc = z >= normcutoff
+                 ratioc = abs((maxnormz-z)/(maxnormz-normcutoff))
+                 rncdiff = abs((z-normcutoff)/(maxnormz-normcutoff))
+            if testc:
                     landlow_rockn = lerpcolor(landlow_rock,landlow_rock2,gval2)
                     landhigh_rockn = lerpcolor(landhigh_rock,landhigh_rock2,
                                                gval2)
@@ -576,26 +639,72 @@ for j in range(dimY):
                                          (h-flood)/(mount-flood))
 ##                    newcolor = lerpcolor(landlow_rock,landhigh_rock,
 ##                                         (h-flood)/(mount-flood))
-                    newcolor4 = lerpcolor(rock,dark_rock,
-                                         (maxnormz-z)/(maxnormz-normcutoff))
+                    newcolor4 = lerpcolor(rock,dark_rock,ratioc)
                     newcolor5 = lerpcolor(newcolor3,newcolor4,.5)
                     ## feathering color
-                    ncdiff = (z-normcutoff)/(maxnormz-normcutoff)
-                    if ncdiff < 0:
-                            print(ncdiff)
+##                    ncdiff = abs((z-normcutoff)/(maxnormz-normcutoff))
+                    if rncdiff < 0:
+                            print(rncdiff)
                     ## using 3rd degree polynomial for falloff
                     ## -83.3021 x^3-72.8482 x^2+18.1178 x
-                    if ncdiff >.1:
+                    ## use cf for reference polys it is keyed from .1 to .7
+                    if rncdiff > CFK1:
                             gval3 = 1
                     else:
-                            gval3 = -83.3021*ncdiff*ncdiff*ncdiff - 72.8482*ncdiff*ncdiff+18.1178*ncdiff
-                    newcolor = lerpcolor(newcolor,newcolor5,1-gval3)
-                    
+                            gval3 = cf[CFK1][0]*rncdiff*rncdiff*rncdiff +cf[CFK1][1]*rncdiff*rncdiff+cf[CFK1][2]*rncdiff + cf[CFK1][3]
+                    newcolor = lerpcolor2(newcolor,newcolor5,gval3)
+##                    newcolor = newcolor5
+            hth = abs((h-mount)/(hmax-mount))
+            if hth <= .1:
+                    newcolor6=lerpcolor(mountlow,mounthigh,abs((h-mount)/(hmax-mount)))
+                    newcolor7 = lerpcolor(mountlow,mounthigh,(z-minnormz)/(normdiff))
+                    newcolor8 = lerpcolor(newcolor6,newcolor7,.5)
+                    gval4 = -83.3021*hth*hth*hth - 72.8482*hth*hth+18.1178*hth
+                    newcolor = lerpcolor(newcolor,newcolor8,1-gval4)
+            hfth = abs((h-flood)/(hmin-flood))
+            if hfth <= .1:
+##                    newcolor9=lerpcolor(mountlow,mounthigh,abs((h-mount)/(hmax-mount)))
+##                    newcolor10 = lerpcolor(mountlow,mounthigh,(z-minnormz)/(normdiff))
+##                    newcolor11 = lerpcolor(newcolor9,newcolor10,.5)
+
+                    ncoords3 = (i /nsize3 + origin_x, j/ nsize3 + origin_y,
+                                0.0 + origin_z)
+                    gval6 = fractal(ncoords3,dimension3,lacunarity3,depth3,nbasis3)
+                    gval6 += 1
+                    gval6 *= .5
+                    gval6 = clamp(gval6)
+                    newcolorl = lerpcolor(waterlow,waterlow2,gval6)
+                    newcolorh = lerpcolor(waterhigh,waterhigh2,gval6)
+                    newcolor9 = lerpcolor(newcolorl,newcolorh,h/flood)
+
+                    newcolor10 = lerpcolor(waterlow,waterhigh,dw)
+                    newcolorw = lerpcolor(newcolor9,newcolor10,.5)
+                    gval5 = -83.3021*hfth*hfth*hfth - 72.8482*hfth*hfth+18.1178*hfth
+                    newcolor = lerpcolor(newcolor,newcolorw,1-gval5)
 ##                    newcolor = lerpcolor(dark_rock,rock,(h-flood)/(mount-flood))
         ## assign the newcolor to the blender image pixel indices per channel
         r,g,b = newcolor
         
         ##rchi,gchi,bchi,achi = getpixel((i,j))
+        if not (0<= r < 256):
+                print('r out of bounds')
+                print(r)
+                print(gval5)
+                print(ncoords3)
+                print(h/flood)
+                print(dw)
+                if h < flood:
+                        print('h is a flood coordinate')
+        if not (0<= g < 256):
+                print('g out of bounds')
+                print(g)
+                if h < flood:
+                        print('h is a flood coordinate')
+        if not (0<= b < 256):
+                print('b out of bounds')
+                print(b)
+                if h < flood:
+                        print('h is a flood coordinate')
         colormap[(i,j)] = (r,g,b)
 ##            image_object.pixels[rchi] = (r/255.0)
 ##            image_object.pixels[gchi] = (g/255.0)
