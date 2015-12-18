@@ -10,7 +10,7 @@ NORMFAC = 1
 dimX = 1024
 dimY = 1024
 colormap = {}
-nsize = 200.0 ## ranges from .01 to 10000 (used in fractalizing terrain coloring)
+nsize = 150.0 ## ranges from .01 to 10000 (used in fractalizing terrain coloring)
 nsize2 = 40.0
 nsize3 = 40.0 ## high water fractal texturing
 nbasis = 3 ## default 0 for Blender
@@ -660,7 +660,7 @@ for j in range(dimY):
                     newcolor7 = lerpcolor(mountlow,mounthigh,(z-minnormz)/(normdiff))
                     newcolor8 = lerpcolor(newcolor6,newcolor7,.5)
                     gval4 = -83.3021*hth*hth*hth - 72.8482*hth*hth+18.1178*hth
-                    newcolor = lerpcolor(newcolor,newcolor8,1-gval4)
+                    newcolor = lerpcolor2(newcolor,newcolor8,1-gval4)
             hfth = abs((h-flood)/(hmin-flood))
             if hfth <= .1:
 ##                    newcolor9=lerpcolor(mountlow,mounthigh,abs((h-mount)/(hmax-mount)))
@@ -680,7 +680,7 @@ for j in range(dimY):
                     newcolor10 = lerpcolor(waterlow,waterhigh,dw)
                     newcolorw = lerpcolor(newcolor9,newcolor10,.5)
                     gval5 = -83.3021*hfth*hfth*hfth - 72.8482*hfth*hfth+18.1178*hfth
-                    newcolor = lerpcolor(newcolor,newcolorw,1-gval5)
+                    newcolor = lerpcolor2(newcolor,newcolorw,1-gval5)
 ##                    newcolor = lerpcolor(dark_rock,rock,(h-flood)/(mount-flood))
         ## assign the newcolor to the blender image pixel indices per channel
         r,g,b = newcolor
