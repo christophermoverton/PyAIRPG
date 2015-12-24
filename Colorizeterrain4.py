@@ -56,7 +56,8 @@ CFK2 = .1
 ## order based upon its 'sequence' identifier.
 ## Modules need have the following key information:
 ## 'Landtype' specified either 'Flood', 'Land', 'Mount'
-## 'Type' specified either 'Height', or 'Normal'
+## 'Type' (not really used at the moment) specified either 'Height', 'Normal' 
+
 ## 'TBracket' or Threshold bracket range these need supplied ordered csale
 ## 2 tuple 0 <= value <= 1.  Note: any overlap in the bracketing range
 ## from one module to the next on the same landtype will lead to mixing
@@ -89,6 +90,23 @@ CFK2 = .1
 ## instructions given by the NTMC module itself, but this doesn't provide
 ## external mixing instructions for a given output color determination
 ## of the module.
+## 'ThreshType' is used in place of 'Type'
+##  value ranges are 'normal', 'height', 'heightT' and 'normalT'
+## The difference between, for instance, 'height' and 'heightT' is that
+## an while TBracket is used under the circumstance of 'height' and 'normal',
+## both in deciding to color interpolate a pixel with this tm
+## this does not apply with 'heightT' or 'normalT' instead these use an
+## independent cutoff control 'TBracket2' in preliminary testing of
+## a given heightmap value h and its associated normal z value.  While
+## 'TBracket' is used in controlling the interpolation of color values
+## under 'heightT' and 'normalT' the second 'TBracket2' range is constructed
+## indpendently for decision controlling the call to color a sample a pixel
+## relative to threshold range for actual color interpolation.
+## 'TBracket2' must be key value specified if 'HeightT' or 'NormalT' is
+## specified.
+## 'TBracket2' are normally positive entries from 0 to 1.  You can default
+## an entry as a void by making it any negative value since a test on
+## 'TBracket2' values are in comparison for test values from 0 to 1.
 ##  External mixing where a color value need be done by mixing module.
 ## Threshold modules are basis units that compute what need be done before
 ## color information is aggregated further by the mixing modules. Calls
@@ -105,9 +123,9 @@ CFK2 = .1
 ## proper functioning of the module.  These are 2 tuple defined.
 ## 'Outs' Module output identifiers here.  Minimum of 1 supplied.
 ## 'Type'  Type is given by one of the following:
-##  'Multiply, Screen, Overlay, Hard light, Soft Light, Dodge, Burn,
-##   Divide, Addition, Subtract, Difference, Darken Only, Lighten Only,
-##   Normal (colorlerp), Normal2 (colorlerp2)'
+##  'multiply, screen, overlay, hard light, soft light, dodge, burn,
+##   divide, addition, subtract, difference, darken only, lighten only,
+##   normal (colorlerp), normal2 (colorlerp2)'
 ## 'FactorType' either 'fixed' or 'variable', or 'falloff' 
 ## 'FactorVar' (if FactorType set 'variable' only) set either 'normal' or
 ## 'height', 'normalT' (normal threshold), or 'heightT' (height threshold)   
@@ -136,6 +154,7 @@ CFK2 = .1
 ## type neither has id overlap.
 ##  'RGB' is the rgb standard 3 tuple given value (non normalized).
 ## ColorInOut Module is a dictionary database for the mixing driver.
+## CIOM all ('final') output reserved channel is 0.
 
 ## Mixing Driver (MD)
 ## ordered list
@@ -252,51 +271,92 @@ TM =[{'Landtype':'Land', 'Type': 'height', 'TBracket':[0,1], 'Fractal': True,
       {'Landtype':'Flood', 'Type': 'height', 'TBracket':[0,1], 'Fractal': True,
         'Colors':[[waterhigh,0],[waterhigh2,1]], 'Name': 'WHFFractal',
         'nsize': nsize3, 'nbasis': nbasis3, 'lacunarity':lacunarity3,
-        'depth':depth3, 'dimension':dimension3, 'id': 6, 'ThreshType': 'height'}]
+        'depth':depth3, 'dimension':dimension3, 'id': 6, 'ThreshType': 'height'},
+      {'Landtype':'Mount', 'Type': 'heightT', 'TBracket':[0,1],
+       'TBracket2': [CFK2,-float('inf')],'Fractal': False,
+        'Colors':[[mountlow,0],[mounthigh,1]], 'Name': 'MountainThreshold',
+        'nsize': nsize3, 'nbasis': nbasis3, 'lacunarity':lacunarity3,
+        'depth':depth3, 'dimension':dimension3, 'id': 23, 'ThreshType': 'heightT'},
+      {'Landtype':'Mount', 'Type': 'normal', 'TBracket':[0,1], 'Fractal': False,
+        'Colors':[[mountlow,0],[mounthigh,1]], 'Name': 'MountainNormal',
+        'nsize': nsize3, 'nbasis': nbasis3, 'lacunarity':lacunarity3,
+        'depth':depth3, 'dimension':dimension3, 'id': 24, 'ThreshType': 'normal'},
+      {'Landtype':'Flood', 'Type': 'heightT', 'TBracket':[0,1],
+       'TBracket2': [-1,CFK2],'Fractal': True,
+        'Colors':[[waterlow,0],[waterlow2,1]], 'Name': 'WaterLowLandThreshold',
+        'nsize': nsize3, 'nbasis': nbasis3, 'lacunarity':lacunarity3,
+        'depth':depth3, 'dimension':dimension3, 'id': 27, 'ThreshType': 'heightT'},
+      {'Landtype':'Flood', 'Type': 'heightT', 'TBracket':[0,1],
+       'TBracket2': [-1,CFK2],'Fractal': True,
+        'Colors':[[waterhigh,0],[waterhigh2,1]], 'Name': 'WaterHighLandThreshold',
+        'nsize': nsize3, 'nbasis': nbasis3, 'lacunarity':lacunarity3,
+        'depth':depth3, 'dimension':dimension3, 'id': 28, 'ThreshType': 'heightT'},
+     ]
 
 DCI ={8: waterlow, 9: waterhigh, 15: dark_grass, 16: light_grass,
       20: rock, 21: dark_rock}
+DCI_LTYPE = {'Flood': [8,9], 'Land': [15,16,20,21]}
 
 MM = {7: {'id': 7, 'Landtype': 'Flood', 'Ins': (5,6), 'Outs': 7, 'Type':,
           'normal', 'FactorType' : 'variable', 'FactorVar': 'height',
-          'Factor':0, 'Falloff':0},
+          'Factor':0, 'Falloff':0, 'MainOut': False},
       10: {'id': 10, 'Landtype': 'Flood', 'Ins': (8,9), 'Outs': 10, 'Type':,
           'normal', 'FactorType' : 'variable', 'FactorVar': 'normal',
-          'Factor':0, 'Falloff':0},
+          'Factor':0, 'Falloff':0, 'MainOut': False},
       11: {'id': 11, 'Landtype': 'Flood', 'Ins': (7,10), 'Outs': 11, 'Type':,
           'normal', 'FactorType' : 'fixed', 'FactorVar': 'normal',
-          'Factor':.5, 'Falloff':0},
+          'Factor':.5, 'Falloff':0, 'MainOut': True},
       12: {'id': 12, 'Landtype': 'Land', 'Ins': (1,2), 'Outs': 12, 'Type':,
           'normal', 'FactorType' : 'variable', 'FactorVar': 'height',
-          'Factor':0, 'Falloff':0},
+          'Factor':0, 'Falloff':0, 'MainOut': False},
       13: {'id': 13, 'Landtype': 'Land', 'Ins': (15,16), 'Outs': 13, 'Type':,
           'normal', 'FactorType' : 'variable', 'FactorVar': 'normal',
-          'Factor':0, 'Falloff':0},
+          'Factor':0, 'Falloff':0, 'MainOut': False},
       14: {'id': 14, 'Landtype': 'Land', 'Ins': (12,13), 'Outs': 14, 'Type':,
           'normal', 'FactorType' : 'fixed', 'FactorVar': 'normal',
-          'Factor':.3, 'Falloff':0},
+          'Factor':.3, 'Falloff':0, 'MainOut': True},
       17: {'id': 17, 'Landtype': 'Land', 'Ins': (3,4), 'Outs': 17, 'Type':,
           'normal', 'FactorType' : 'variable', 'FactorVar': 'height',
-          'Factor':0, 'Falloff':0},
+          'Factor':0, 'Falloff':0, 'MainOut': False},
       18: {'id': 18, 'Landtype': 'Land', 'Ins': (20,21), 'Outs': 18, 'Type':,
           'normal', 'FactorType' : 'variable', 'FactorVar': 'normal',
-          'Factor':0, 'Falloff':0},
+          'Factor':0, 'Falloff':0, 'MainOut': False},
       19: {'id': 14, 'Landtype': 'Land', 'Ins': (17,18), 'Outs': 19, 'Type':,
           'normal', 'FactorType' : 'fixed', 'FactorVar': 'normal',
-          'Factor':.5, 'Falloff':0},
+          'Factor':.5, 'Falloff':0, 'MainOut': True},
       22: {'id': 22, 'Landtype': 'Land', 'Ins': (14,19), 'Outs': 22, 'Type':,
           'normal2', 'FactorType' : 'falloff', 'FactorVar': 'normalT',
-          'Factor':.5, 'Falloff':CFK1},
+          'Factor':.5, 'Falloff':[CFK1,-1], 'TBracket'[.1,1],
+           'FalloffEndPts': [.1], , 'MainOut': True},
+      25: {'id': 25, 'Landtype': 'Land', 'Ins': (23,24), 'Outs': 25, 'Type':,
+          'normal', 'FactorType' : 'fixed', 'FactorVar': 'normal',
+          'Factor':.5, 'Falloff':0, 'MainOut': False},      
+      26: {'id': 26, 'Landtype': 'Land', 'Ins': (0,25), 'Outs': 26, 'Type':,
+          'normal2', 'FactorType' : 'falloff', 'FactorVar': 'heightT',
+          'Factor':.5, 'Falloff':[-1,CFK1], 'TBracket'[.1,1],
+           'FalloffEndPts': [.1], , 'MainOut': True}
+      29: {'id': 29, 'Landtype': 'Land', 'Ins': (27,28), 'Outs': 29, 'Type':,
+          'normal', 'FactorType' : 'variable', 'FactorVar': 'height',
+          'Factor':.5, 'Falloff':0, 'MainOut': False},   
       }
 
 CIOM = {}
 
 MD = []
+MD_Dependencies = []
 
-NCs = {5:{'Chain':[7,10,11],'Dependencies':[0]},
-       1:{'Chain':[12,13,14],'Dependencies':[0]},
+## It is up to the user to supply correct ordering for dictionary entries
+## in terms of depedent chains.  I don't remedy this by backchecking
+## out of order chains.
+NCs = {5:{'Chain':[7,10,11],'Dependencies':[-1]},
+       1:{'Chain':[12,13,14],'Dependencies':[-1]},
        3:{'Chain':[17,18,19],'Dependencies':[1]},
-       19:{'Chain:'[22],'Dependencies':[1,3]}}
+       19:{'Chain':[22],'Dependencies':[1,3]},
+       23:{'Chain':[25,26],'Dependencies':[-1]}
+       }
+
+
+NCsCutoffs = {}
 
 def cubicInterpolate(p,x):
 	return p[1]+.5*x*(-1.0*p[0]+p[2])+x*x*(p[0]-5.0/2.0*p[1]+2.0*p[2]-.5*p[3])+x*x*x*(-.5*p[0]+1.5*p[1]-1.5*p[2]+.5*p[3])
@@ -334,6 +394,16 @@ def normalize(vec):
     x,y,z = vec
     d = (x*x+y*y+z*z)**.5
     return (x/d,y/d,z/d)
+
+def normalizecolor(c):
+     ##8 bit normalization
+     r,g,b = c
+     return (r/255.0,g/255.0,b/255.0)
+
+def rnormalizecolor(c):
+     ## 8 bit reverse normalization
+     r,g,b = c
+     return (255.0*r,255.0*g, 255.0*b)
 
 def computeGrad(heightmap, normalmap):
     for i in range(dimX):
@@ -715,6 +785,9 @@ def getNormcutoff(NORM, normdiff, minormz, maxnormz, cscale):
           return maxnormz - cscale*normdiff
      else:
           return minnormz + cscale*normdiff
+     
+def getHeightcutoff(heightdiff, minheight, cscale):
+     return minheight + heightdiff*cscale
 
 def getpixel(uvpixcoord ,dimX = dimX, dimY = dimY):
     px,py = uvpixcoord
@@ -840,6 +913,7 @@ Scalefy = dimY/abs(maxvcoy - minvcoy)
 trf = [trfacx,trfacy]
 scf = [Scalefx,Scalefy]
 normdiff = abs(maxnormz - minnormz)
+hdiff = abs(hmin - hmax)
 cscale = .1
 
 
@@ -1002,7 +1076,197 @@ for f in bm.faces:
 ##			a[3][0] = (*heightmap)[(*p30)]; a[3][1] = (*heightmap)[(*p31)]; 
 ##			a[3][2] = (*heightmap)[(*p32)]; a[3][3] = (*heightmap)[(*p33)];                        
 ##computeGrad(heightmap2, normalmap)
+                
+## unpack TM
+tm_flood = {}
+tm_land = {}
+tm_mount = {}
+for t in TM:
+     if t['Landtype'] == 'Land':
+          tm_land[t['id']] = t
+     elif t['Landtype'] == 'Flood':
+          tm_flood[t['id']] = t
+     elif t['Landtype'] == 'Mount':
+          tm_mount[t['id']] = t
+          
 gval5 = 0
+
+def getCutoffs(t, h, nz, hdiff, hmin, NORM, normdiff,
+               minnormz, maxnormz, t1, t2):
+     if t['ThreshType'] == 'height':
+          cs1,cs2 = t['TBracket']
+          t1 = getHeightcutoff(hdiff, hmin, cs1)
+          t2 = getHeightcutoff(hdiff, hmin, cs2)
+     elif t['ThreshType'] == 'normal':
+          cs1,cs2 = t['TBracket']
+          t1 = getNormcutoff(NORM, normdiff, minnormz, maxnormz, cs1)
+          t2 = getNormcutoff(NORM, normdiff, minnormz, maxnormz, cs2)
+
+def checktm(t, h, nz, hdiff, hmin, NORM, normdiff,
+            minnormz, maxnormz, t1, t2):
+     if t['ThreshType'] == 'height':
+          cs1,cs2 = t['TBracket']
+          t1 = getHeightcutoff(hdiff, hmin, cs1)
+          t2 = getHeightcutoff(hdiff, hmin, cs2)
+          if t2 >= h >= t1:
+               return True
+          else:
+               return False
+     elif t['ThreshType'] == 'normal':
+          cs1,cs2 = t['TBracket']
+          t1 = getNormcutoff(NORM, normdiff, minnormz, maxnormz, cs1)
+          t2 = getNormcutoff(NORM, normdiff, minnormz, maxnormz, cs2)
+          if t1 <= t2:
+               if t1 <= nz <= t2:
+                    return True
+               else:
+                    return False
+          else:
+               if t1 >= nz >= t2:
+                    return True
+               else:
+                    return False
+     elif t['ThreshType'] == 'heightT':
+          cs1,cs2 = t['TBracket2']
+##          t1 = getHeightcutoff(hdiff, hmin, cs1)
+##          t2 = getHeightcutoff(hdiff, hmin, cs2)
+          cs3, cs4 = t['TBracket']
+          t1 = getHeightcutoff(hdiff, hmin, cs3)
+          t2 = getheightcutoff(hdiff, hmin, cs4)
+          if cs1 >= abs((t1-h)/(t2-t1)):
+               return True
+          else:
+               return False
+
+          if cs2 >= abs((t2-h)/(t2-t1)):
+               return True
+          else:
+               return False        
+     
+
+def getThColor(t, h, nz, ijorigin, thrshs):
+     i, j, origin = ijorigin
+     
+     if t['Fractal']:
+          ncoord = (i/t['nsize'] + origin[0], j/t['nsize'] + origin[1],
+                    0.0+origin[2])
+          gval = fractal(ncoord, t['dimension'],t['lacunarity'],t['depth'],
+                         t['nbasis'])
+          gval += 1
+          gval *= .5
+          gval = clamp(gval)
+          return interpcolorpos(gval, t['Colors'])
+     else:
+          t1, t2 = thrshs
+          test1 = t['ThreshType'] == 'height'
+          test2 = t['ThreshType'] == 'heightT'
+          test3 = t['ThreshType'] == 'normal'
+          test4 = t['ThreshType'] == 'normalT'
+          if test1 or test2:
+               
+               gval = abs(t1-h)/(abs(t1-t2))
+          elif test3 or test4:
+               gval = abs(t1-nz)/(abs(t1-t2))
+          return interpcolorpos(gval, t['Colors'])
+
+def setMixColor(MM,CIOM,mID,h, nz, hmax=hmax, NORM=NORM, normdiff=normdiff,
+                minnormz = minnormz, maxnormz = maxnormz, FM = FM):
+     ##MM = {7: {'id': 7, 'Landtype': 'Flood', 'Ins': (5,6), 'Outs': 7, 'Type':,
+     ##     'normal', 'FactorType' : 'variable', 'FactorVar': 'height',
+     ##     'Factor':0, 'Falloff':0},
+     flood,mount = FM
+     in1,in2 = MM[mID]['Ins']
+     in1 = normalizecolor(in1)
+     in2 = normalizecolor(in2)
+     out1 = MM[mID]['Outs']
+     if MM[mID]['FactorType'] == 'variable':
+          if MM[mID]['FactorVar'] == 'height':
+               if MM[mID]['Landtype'] == 'Flood':
+                    gval = h/flood
+               elif MM[mID]['Landtype'] == 'Land':
+                    gval = (abs(h-flood))/(abs(flood - mount))
+               elif MM[mID]['Landtype'] == 'Mount':
+                    gval = (abs(h - mount))/(abs(mount - hmax))
+          elif MM[mID]['FactorVar'] == 'normal':
+               if NORM:
+                    gval = (abs(maxnormz - nz))/abs(normdiff)
+               else:
+                    gval = (abs(minnormz - nz))/abs(normdiff)
+                    
+     elif MM[mID]['FactorType'] == 'falloff':
+          if MM[mID]['FactorVar'] == 'normalT':
+               t1 = 0
+               t2 = 0
+               getCutoffs(t, h, nz, hdiff, hmin, NORM, normdiff,
+                           minnormz, maxnormz, t1, t2)
+               s1,s2 = t['TBracket']
+               rncdiff1 = float('inf')
+               rncdiff2 = float('inf')
+##               if s1 in t['FalloffEndPts']:
+               rncdiff1 = abs((z-t1)/(t1-t2))
+##               if s2 in t['FalloffEndPts']:
+               rncdiff2 = abs((z-t2)/(t1-t2))
+               if rncdiff1 > t['Falloff'][0]:
+                    gval = 1
+               else:
+                    gval = getCubicY(cf[CFK1],rncdiff1)
+               if rncdiff2 > t['Falloff'][1]:
+                    gval = 1
+               else:
+                    gval = getCubicY(cf[CFK1],rncdiff2)
+          elif MM[mID]['FactorVar'] == 'heightT':
+               t1 = 0
+               t2 = 0
+               getCutoffs(t, h, nz, hdiff, hmin, NORM, normdiff,
+                           minnormz, maxnormz, t1, t2)
+               s1,s2 = t['TBracket']
+               rncdiff1 = float('inf')
+               rncdiff2 = float('inf')
+##               if s1 in t['FalloffEndPts']:
+               rncdiff1 = abs((h-t1)/(t1-t2))
+##               if s2 in t['FalloffEndPts']:
+               rncdiff2 = abs((h-t2)/(t1-t2))
+               if rncdiff1 > t['Falloff'][0]:
+                    gval = 1
+               else:
+                    gval = getCubicY(cf[CFK2],rncdiff1)
+               if rncdiff2 > t['Falloff'][1]:
+                    gval = 1
+               else:
+                    gval = getCubicY(cf[CFK2],rncdiff2)
+     elif MM[mID]['FactorType'] == 'fixed':
+          gval = MM[mID]['Factor']
+     if MM[mID]['Type'] == 'normal':
+          CIOM[out1] = lerpcolor(in1,in2,gval)
+     elif MM[mID]['Type'] == 'normal2':
+          CIOM[out1] = lerpcolor2(in1,in2,gval)
+     elif MM[mID]['Type'] == 'multiply':
+          CIOM[out1] = mulitply(in1,in2)
+     elif MM[mID]['Type'] == 'screen':
+          CIOM[out1] = screen(in1,in2)
+     elif MM[mID]['Type'] == 'overlay':
+          CIOM[out1] = overlay(in1,in2)
+     elif MM[mID]['Type'] == 'hardlight':
+          CIOM[out1] = hardlight(in1,in2)
+     elif MM[mID]['Type'] == 'softlight':
+          CIOM[out1] = softlight(in1,in2)
+     elif MM[mID]['Type'] == 'dodge':
+          CIOM[out1] = dodge(in1,in2, 'ColorDodge')
+     elif MM[mID]['Type'] == 'burn':
+          CIOM[out1] = burn(in1,in2, 'ColorBurn')
+     elif MM[mID]['Type'] == 'vividlight':
+          CIOM[out1] = vividlight(in1,in2)
+     elif MM[mID]['Type'] == 'difference':
+          CIOM[out1] = difference(in1,in2)
+     elif MM[mID]['Type'] == 'divide':
+          CIOM[out1] = divide(in1,in2)
+     elif MM[mID]['Type'] == 'darkenonly':
+          CIOM[out1] = darkenonly(in1,in2)
+     elif MM[mID]['Type'] == 'lightenonly':
+          CIOM[out1] = lightenonly(in1,in2)
+     CIOM[out1] = rnormalizecolor(CIOM[out1])
+
+FM = (flood,mount)
 for j in range(dimY):
     for i in range(dimX):
         if not (i,j) in normalmap:
@@ -1013,20 +1277,47 @@ for j in range(dimY):
                 continue
         h = heightmap2[(i,j)]
         dw = (1.0-(z*z))**.5 ## //normals weighting when normal is positive z then 0 normal weight
-        dw = clamp(dw)            
+        dw = clamp(dw)
         if (h<flood):
-            ncoords3 = (i /nsize3 + origin_x, j/ nsize3 + origin_y,
-                        0.0 + origin_z)
-            gval6 = fractal(ncoords3,dimension3,lacunarity3,depth3,nbasis3)
-            gval6 += 1
-            gval6 *= .5
-            gval6 = clamp(gval6)
-            newcolorl = lerpcolor(waterlow,waterlow2,gval6)
-            newcolorh = lerpcolor(waterhigh,waterhigh2,gval6)
-            newcolor=lerpcolor(newcolorl,newcolorh,h/flood)
-
-            newcolor2 = lerpcolor(waterlow,waterhigh,dw)
-            newcolor = lerpcolor(newcolor,newcolor2,.5)
+             ## compute on tm_flood module (if any)
+             for t in tm_flood:
+                  t1 = 0
+                  t2 = 0
+                  if checktm(t, h, nz, hdiff, hmin, NORM, normdiff,
+                             minnormz, maxnormz, t1, t2):
+                       thrshs = (t1,t2)
+                       ## assign to ColorInOut
+                       CIOM[t['id']] = getThColor(t, h, nz, ijorigin, thrshs)
+             ## Load DCI from DCI_LTYPE into CIOM
+             for dci in DCI_LTYPE['Flood']:
+                  CIOM[dci] = DCI[dci]
+             ## next check CIOM for NCs (Node chains) these will be aded to MD
+             for ci in CIOM:
+                  if ci in NCs:
+                       if NCs[ci]['Dependencies'] != -1:
+                            for dep in NCs[ci]['Dependencies']:
+                                 if dep in MD_Dependencies:
+                                      MD += NCs[ci]['Chain']
+                                      MD_Dependencies.append(ci)
+                       else:
+                            MD+= NCs[ci]
+                            MD_Dependencies.append(ci)
+             ## next iterate MD for mixing
+             for mix in MD:
+                  setMixColor(MM,CIOM,mix,h, nz)
+                       
+##            ncoords3 = (i /nsize3 + origin_x, j/ nsize3 + origin_y,
+##                        0.0 + origin_z)
+##            gval6 = fractal(ncoords3,dimension3,lacunarity3,depth3,nbasis3)
+##            gval6 += 1
+##            gval6 *= .5
+##            gval6 = clamp(gval6)
+##            newcolorl = lerpcolor(waterlow,waterlow2,gval6)
+##            newcolorh = lerpcolor(waterhigh,waterhigh2,gval6)
+##            newcolor=lerpcolor(newcolorl,newcolorh,h/flood)
+##
+##            newcolor2 = lerpcolor(waterlow,waterhigh,dw)
+##            newcolor = lerpcolor(newcolor,newcolor2,.5)
         elif (h>mount):
             newcolor=lerpcolor(mountlow,mounthigh,(h-mount)/(hmax-mount))
             addLandmaposition((i,j),landmap,landmaprev)
