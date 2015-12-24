@@ -9,6 +9,8 @@ BICUBIC = False ## don't make True not enabled at the moment
 NORMFAC = 1
 dimX = 1024
 dimY = 1024
+floodn = .01  ## normalized flood cutoff value
+mountn = .5  ## normalized mount cutoff value
 colormap = {}
 landlow = (0,64,0)
 landhigh = (116,182,133)
@@ -248,11 +250,11 @@ else:
 ## This should work as a standalone in reading terrain height elevation data.
 ## Note: This does not convert spherical,ellipitical, or quasi spherical
 ## landscape data.  
-TM =[{'Landtype':'Land', 'Type': 'height', 'TBracket':[0,1], 'Fractal': True,
+TM =[{'Landtype':'Land', 'Type': 'height', 'TBracket':[floodn,mountn], 'Fractal': True,
         'Colors':[[landlow_dirt,0],[landlow,1]], 'Name': 'LLDFractal',
         'nsize': nsize, 'nbasis': nbasis, 'lacunarity':lacunarity,
         'depth':depth, 'dimension':dimension, 'id': 1, 'ThreshType': 'height'},
-      {'Landtype':'Land', 'Type': 'height', 'TBracket':[0,1], 'Fractal': True,
+      {'Landtype':'Land', 'Type': 'height', 'TBracket':[floodn,mountn], 'Fractal': True,
         'Colors':[[landhigh_dirt,0],[landhigh,1]], 'Name': 'LHDFractal',
         'nsize': nsize, 'nbasis': nbasis, 'lacunarity':lacunarity,
         'depth':depth, 'dimension':dimension, 'id': 2, 'ThreshType': 'height'},
@@ -264,11 +266,11 @@ TM =[{'Landtype':'Land', 'Type': 'height', 'TBracket':[0,1], 'Fractal': True,
         'Colors':[[landhigh_rock,0],[landhigh_rock2,1]], 'Name': 'LHRFractal',
         'nsize': nsize2, 'nbasis': nbasis2, 'lacunarity':lacunarity2,
         'depth':depth2, 'dimension':dimension2, 'id': 4, 'ThreshType': 'normal'},
-     {'Landtype':'Flood', 'Type': 'height', 'TBracket':[0,1], 'Fractal': True,
+     {'Landtype':'Flood', 'Type': 'height', 'TBracket':[0,floodn], 'Fractal': True,
         'Colors':[[waterlow,0],[waterlow2,1]], 'Name': 'WLFractal',
         'nsize': nsize3, 'nbasis': nbasis3, 'lacunarity':lacunarity3,
         'depth':depth3, 'dimension':dimension3, 'id': 5, 'ThreshType': 'height'},
-      {'Landtype':'Flood', 'Type': 'height', 'TBracket':[0,1], 'Fractal': True,
+      {'Landtype':'Flood', 'Type': 'height', 'TBracket':[0,floodn], 'Fractal': True,
         'Colors':[[waterhigh,0],[waterhigh2,1]], 'Name': 'WHFFractal',
         'nsize': nsize3, 'nbasis': nbasis3, 'lacunarity':lacunarity3,
         'depth':depth3, 'dimension':dimension3, 'id': 6, 'ThreshType': 'height'},
@@ -297,47 +299,53 @@ DCI ={8: waterlow, 9: waterhigh, 15: dark_grass, 16: light_grass,
       20: rock, 21: dark_rock}
 DCI_LTYPE = {'Flood': [8,9], 'Land': [15,16,20,21]}
 
-MM = {7: {'id': 7, 'Landtype': 'Flood', 'Ins': (5,6), 'Outs': 7, 'Type':,
+MM = {7: {'id': 7, 'Landtype': 'Flood', 'Ins': (5,6), 'Outs': 7, 'Type':
           'normal', 'FactorType' : 'variable', 'FactorVar': 'height',
           'Factor':0, 'Falloff':0, 'MainOut': False},
-      10: {'id': 10, 'Landtype': 'Flood', 'Ins': (8,9), 'Outs': 10, 'Type':,
+      10: {'id': 10, 'Landtype': 'Flood', 'Ins': (8,9), 'Outs': 10, 'Type':
           'normal', 'FactorType' : 'variable', 'FactorVar': 'normal',
           'Factor':0, 'Falloff':0, 'MainOut': False},
-      11: {'id': 11, 'Landtype': 'Flood', 'Ins': (7,10), 'Outs': 11, 'Type':,
+      11: {'id': 11, 'Landtype': 'Flood', 'Ins': (7,10), 'Outs': 11, 'Type':
           'normal', 'FactorType' : 'fixed', 'FactorVar': 'normal',
           'Factor':.5, 'Falloff':0, 'MainOut': True},
-      12: {'id': 12, 'Landtype': 'Land', 'Ins': (1,2), 'Outs': 12, 'Type':,
+      12: {'id': 12, 'Landtype': 'Land', 'Ins': (1,2), 'Outs': 12, 'Type':
           'normal', 'FactorType' : 'variable', 'FactorVar': 'height',
           'Factor':0, 'Falloff':0, 'MainOut': False},
-      13: {'id': 13, 'Landtype': 'Land', 'Ins': (15,16), 'Outs': 13, 'Type':,
+      13: {'id': 13, 'Landtype': 'Land', 'Ins': (15,16), 'Outs': 13, 'Type':
           'normal', 'FactorType' : 'variable', 'FactorVar': 'normal',
           'Factor':0, 'Falloff':0, 'MainOut': False},
-      14: {'id': 14, 'Landtype': 'Land', 'Ins': (12,13), 'Outs': 14, 'Type':,
+      14: {'id': 14, 'Landtype': 'Land', 'Ins': (12,13), 'Outs': 14, 'Type':
           'normal', 'FactorType' : 'fixed', 'FactorVar': 'normal',
           'Factor':.3, 'Falloff':0, 'MainOut': True},
-      17: {'id': 17, 'Landtype': 'Land', 'Ins': (3,4), 'Outs': 17, 'Type':,
+      17: {'id': 17, 'Landtype': 'Land', 'Ins': (3,4), 'Outs': 17, 'Type':
           'normal', 'FactorType' : 'variable', 'FactorVar': 'height',
           'Factor':0, 'Falloff':0, 'MainOut': False},
-      18: {'id': 18, 'Landtype': 'Land', 'Ins': (20,21), 'Outs': 18, 'Type':,
+      18: {'id': 18, 'Landtype': 'Land', 'Ins': (20,21), 'Outs': 18, 'Type':
           'normal', 'FactorType' : 'variable', 'FactorVar': 'normal',
           'Factor':0, 'Falloff':0, 'MainOut': False},
-      19: {'id': 14, 'Landtype': 'Land', 'Ins': (17,18), 'Outs': 19, 'Type':,
+      19: {'id': 14, 'Landtype': 'Land', 'Ins': (17,18), 'Outs': 19, 'Type':
           'normal', 'FactorType' : 'fixed', 'FactorVar': 'normal',
           'Factor':.5, 'Falloff':0, 'MainOut': True},
-      22: {'id': 22, 'Landtype': 'Land', 'Ins': (14,19), 'Outs': 22, 'Type':,
+      22: {'id': 22, 'Landtype': 'Land', 'Ins': (14,19), 'Outs': 22, 'Type':
           'normal2', 'FactorType' : 'falloff', 'FactorVar': 'normalT',
           'Factor':.5, 'Falloff':[CFK1,-1], 'TBracket'[.1,1],
            'FalloffEndPts': [.1], , 'MainOut': True},
-      25: {'id': 25, 'Landtype': 'Land', 'Ins': (23,24), 'Outs': 25, 'Type':,
+      25: {'id': 25, 'Landtype': 'Land', 'Ins': (23,24), 'Outs': 25, 'Type':
           'normal', 'FactorType' : 'fixed', 'FactorVar': 'normal',
           'Factor':.5, 'Falloff':0, 'MainOut': False},      
-      26: {'id': 26, 'Landtype': 'Land', 'Ins': (0,25), 'Outs': 26, 'Type':,
+      26: {'id': 26, 'Landtype': 'Land', 'Ins': (0,25), 'Outs': 26, 'Type':
           'normal2', 'FactorType' : 'falloff', 'FactorVar': 'heightT',
-          'Factor':.5, 'Falloff':[-1,CFK1], 'TBracket'[.1,1],
+          'Factor':.5, 'Falloff':[CFK1, -1], 'TBracket'[mountn,1],
            'FalloffEndPts': [.1], , 'MainOut': True}
-      29: {'id': 29, 'Landtype': 'Land', 'Ins': (27,28), 'Outs': 29, 'Type':,
-          'normal', 'FactorType' : 'variable', 'FactorVar': 'height',
-          'Factor':.5, 'Falloff':0, 'MainOut': False},   
+      29: {'id': 29, 'Landtype': 'Land', 'Ins': (27,28), 'Outs': 29, 'Type':
+          'normal', 'FactorType' : 'variable', 'FactorVar': 'height2',
+          'Factor':.5, 'Falloff':0, 'MainOut': False, 'Landtype2': 'Flood'},
+      30: {'id': 30, 'Landtype': 'Land', 'Ins': (8,9), 'Outs': 30, 'Type':
+          'normal', 'FactorType' : 'variable', 'FactorVar': 'normal',
+          'Factor':.5, 'Falloff':0, 'MainOut': False},
+      31: {'id': 31, 'Landtype': 'Land', 'Ins': (29,30), 'Outs': 31, 'Type':
+          'normal', 'FactorType' : 'fixed', 'FactorVar': 'normal',
+          'Factor':.5, 'Falloff':0, 'MainOut': False},
       }
 
 CIOM = {}
@@ -925,8 +933,9 @@ else:
      normcutoff = maxnormz - cscale*normdiff
      NORM = 1
 diff = abs(hmax-hmin)
-flood=0.01  ## flood plain
-mount=0.50 ##mountain level
+flood=floodn  ## flood plain
+mount=mountn ##mountain level
+
 	
 flood*=diff
 mount*=diff
@@ -1192,6 +1201,19 @@ def setMixColor(MM,CIOM,mID,h, nz, hmax=hmax, NORM=NORM, normdiff=normdiff,
                     gval = (abs(maxnormz - nz))/abs(normdiff)
                else:
                     gval = (abs(minnormz - nz))/abs(normdiff)
+          elif MM[mID]['FactorVar'] == 'height2':
+               ## 'height2' for 'FactorVar' only works with 'Landtype' == 'Land'
+               ## note these formulation do not gaurantee that 0<=gval<=1
+               ## that is up to the user in supplying cutoff/threshold conditions
+               ## which ensures this.
+               if MM[mID]['Landtype2'] == 'Flood':
+                    ## get difference of h from floor(h)
+##                    hdiff = h/flood- int(h/flood)
+##                    hflood = flood - hdiff*flood
+                    gval = abs((h-flood)/(hmin-flood))
+##                    gval = hflood/flood
+               elif MM[mID]['Landtype2'] == 'Mount':
+                    gval = abs((h-mount)/(hmax-mount))
                     
      elif MM[mID]['FactorType'] == 'falloff':
           if MM[mID]['FactorVar'] == 'normalT':
