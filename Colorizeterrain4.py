@@ -50,6 +50,7 @@ cf = {.05:[-4384.9,75.6728,27.1786,-1.11022e-16],
 .7:[2.32556,-5.33564,4.02399,0.0]}
 CFK1 = .3
 CFK2 = .1
+FM = (0,0)
 
 ## normal thresholding module how it works:
 ## Thresholding modules are housed in a list nested dictionary called
@@ -292,7 +293,7 @@ TM =[{'Landtype':'Land', 'Type': 'height', 'TBracket':[floodn,mountn], 'Fractal'
        'TBracket2': [-1,CFK2],'Fractal': True,
         'Colors':[[waterhigh,0],[waterhigh2,1]], 'Name': 'WaterHighLandThreshold',
         'nsize': nsize3, 'nbasis': nbasis3, 'lacunarity':lacunarity3,
-        'depth':depth3, 'dimension':dimension3, 'id': 28, 'ThreshType': 'heightT'},
+        'depth':depth3, 'dimension':dimension3, 'id': 28, 'ThreshType': 'heightT'}
      ]
 
 DCI ={8: waterlow, 9: waterhigh, 15: dark_grass, 16: light_grass,
@@ -328,15 +329,15 @@ MM = {7: {'id': 7, 'Landtype': 'Flood', 'Ins': (5,6), 'Outs': 7, 'Type':
           'Factor':.5, 'Falloff':0, 'MainOut': True},
       22: {'id': 22, 'Landtype': 'Land', 'Ins': (14,19), 'Outs': 22, 'Type':
           'normal2', 'FactorType' : 'falloff', 'FactorVar': 'normalT',
-          'Factor':.5, 'Falloff':[CFK1,-1], 'TBracket'[.1,1],
-           'FalloffEndPts': [.1], , 'MainOut': True},
+          'Factor':.5, 'Falloff':[CFK1,-1], 'TBracket' : [.1,1],
+           'FalloffEndPts': [.1], 'MainOut': True},
       25: {'id': 25, 'Landtype': 'Land', 'Ins': (23,24), 'Outs': 25, 'Type':
           'normal', 'FactorType' : 'fixed', 'FactorVar': 'normal',
           'Factor':.5, 'Falloff':0, 'MainOut': False},      
       26: {'id': 26, 'Landtype': 'Land', 'Ins': (0,25), 'Outs': 26, 'Type':
           'normal2', 'FactorType' : 'falloff', 'FactorVar': 'heightT',
-          'Factor':.5, 'Falloff':[CFK1, -1], 'TBracket'[mountn,1],
-           'FalloffEndPts': [.1], , 'MainOut': True}
+          'Factor':.5, 'Falloff':[CFK1, -1], 'TBracket' : [mountn,1],
+           'FalloffEndPts': [.1], 'MainOut': True},
       29: {'id': 29, 'Landtype': 'Land', 'Ins': (27,28), 'Outs': 29, 'Type':
           'normal', 'FactorType' : 'variable', 'FactorVar': 'height2',
           'Factor':.5, 'Falloff':0, 'MainOut': False, 'Landtype2': 'Flood'},
@@ -345,7 +346,7 @@ MM = {7: {'id': 7, 'Landtype': 'Flood', 'Ins': (5,6), 'Outs': 7, 'Type':
           'Factor':.5, 'Falloff':0, 'MainOut': False},
       31: {'id': 31, 'Landtype': 'Land', 'Ins': (29,30), 'Outs': 31, 'Type':
           'normal', 'FactorType' : 'fixed', 'FactorVar': 'normal',
-          'Factor':.5, 'Falloff':0, 'MainOut': False},
+          'Factor':.5, 'Falloff':0, 'MainOut': False}
       }
 
 CIOM = {}
@@ -584,7 +585,7 @@ def multiply(c1, c2):
           tcolor[g] = c1l[g]*c2l[g]
      return tuple(tcolor)
 
-def screen(c1, c2)
+def screen(c1, c2):
      ## assumed color values are normalized rgb channels
      tcolor = [0,0,0]
      c1l = list(c1)
@@ -593,7 +594,7 @@ def screen(c1, c2)
           tcolor[g] = 1-1*(1-c1l[g])*(1-c2l[g])
      return tuple(tcolor)
 
-def overlay(c1, c2)
+def overlay(c1, c2):
      ## assumed color values are normalized rgb channels
      tcolor = [0,0,0]
      c1l = list(c1)
@@ -605,7 +606,7 @@ def overlay(c1, c2)
                tcolor[g] = clamp2(1-2*(1-c1l[g])*(1-c2l[g]))
      return tuple(tcolor)
 
-def hardlight(c1, c2)
+def hardlight(c1, c2):
      ## assumed color values are normalized rgb channels
      tcolor = [0,0,0]
      c1l = list(c1)
@@ -617,7 +618,7 @@ def hardlight(c1, c2)
                tcolor[g] = clamp2(1-2*(1-c1l[g])*(1-c2l[g]))
      return tuple(tcolor)
 
-def softlight(c1, c2)
+def softlight(c1, c2):
      ## assumed color values are normalized rgb channels
      tcolor = [0,0,0]
      c1l = list(c1)
@@ -664,7 +665,7 @@ def burn(c1,c2, mode):
                tcolor[g] = clamp2(1-1*(c1l[g]+c2l[g]))
      return tuple(tcolor)
 
-def vividlight(c1, c2)
+def vividlight(c1, c2):
      ## assumed color values are normalized rgb channels
      tcolor = [0,0,0]
      c1l = list(c1)
@@ -755,6 +756,7 @@ def rescaletonormalpos(pos1,pos2, v):
      return nv/p2
      
 def interpcolorpos(v, colors):
+     # ex. colors = [[landlow_dirt,0],[landlow,1]]
      colorsd = {}
      vals = []
      for color in colors:
@@ -768,7 +770,7 @@ def interpcolorpos(v, colors):
      p1 = vals[b1]
      p2 = vals[b2]
      if b1 == b2:
-          return colordsd[p1]
+          return colorsd[p1]
      else:
           ## color interpolation is defined where 2 colors are normalized
           ## on a distance range of 1.  So we need to translate and rescale
@@ -776,7 +778,7 @@ def interpcolorpos(v, colors):
           ## the proper coordinate system for properly linearly interpolating
           ## colors that aren't readily set with one color at origin 0 and
           ## the other at position 1.
-          return lerpcolor2(colors[p1],colors[p2],
+          return lerpcolor2(colorsd[p1],colorsd[p2],
                             rescaletonormalpos(p1,p2,v))
 
 def getCubicY(cfs, x):
@@ -1113,6 +1115,7 @@ def getCutoffs(t, h, nz, hdiff, hmin, NORM, normdiff,
 
 def checktm(t, h, nz, hdiff, hmin, NORM, normdiff,
             minnormz, maxnormz, t1, t2):
+##     print(t)
      if t['ThreshType'] == 'height':
           cs1,cs2 = t['TBracket']
           t1 = getHeightcutoff(hdiff, hmin, cs1)
@@ -1157,8 +1160,8 @@ def getThColor(t, h, nz, ijorigin, thrshs):
      i, j, origin = ijorigin
      
      if t['Fractal']:
-          ncoord = (i/t['nsize'] + origin[0], j/t['nsize'] + origin[1],
-                    0.0+origin[2])
+          ncoord = (i/t['nsize'] + origin[0], j/t['nsize'] + origin[0],
+                    0.0+origin[1])
           gval = fractal(ncoord, t['dimension'],t['lacunarity'],t['depth'],
                          t['nbasis'])
           gval += 1
@@ -1289,6 +1292,7 @@ def setMixColor(MM,CIOM,mID,h, nz, hmax=hmax, NORM=NORM, normdiff=normdiff,
      CIOM[out1] = rnormalizecolor(CIOM[out1])
 
 FM = (flood,mount)
+origin = (origin_x,origin_y) ## randomized fractal origin position
 for j in range(dimY):
     for i in range(dimX):
         if not (i,j) in normalmap:
@@ -1298,18 +1302,20 @@ for j in range(dimY):
         if not (i,j) in heightmap2:
                 continue
         h = heightmap2[(i,j)]
+        ijorigin = (i,j,origin)
         dw = (1.0-(z*z))**.5 ## //normals weighting when normal is positive z then 0 normal weight
         dw = clamp(dw)
         if (h<flood):
              ## compute on tm_flood module (if any)
-             for t in tm_flood:
+             for thr in tm_flood:
                   t1 = 0
                   t2 = 0
-                  if checktm(t, h, nz, hdiff, hmin, NORM, normdiff,
+                  if checktm(tm_flood[thr], h, nz, hdiff, hmin, NORM, normdiff,
                              minnormz, maxnormz, t1, t2):
                        thrshs = (t1,t2)
                        ## assign to ColorInOut
-                       CIOM[t['id']] = getThColor(t, h, nz, ijorigin, thrshs)
+                       CIOM[t['id']] = getThColor(tm_flood[thr], h, nz,
+                                                  ijorigin, thrshs)
              ## Load DCI from DCI_LTYPE into CIOM
              for dci in DCI_LTYPE['Flood']:
                   CIOM[dci] = DCI[dci]
