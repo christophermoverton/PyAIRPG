@@ -229,74 +229,74 @@ else:
 ## This should work as a standalone in reading terrain height elevation data.
 ## Note: This does not convert spherical,ellipitical, or quasi spherical
 ## landscape data.  
-TM =[{'Landtype':'Land', 'Type': 'height', 'TBracket':[0,1], 'Fractal': True,
-        'Colors':[[landlow_dirt,0],[landlow,1]], 'Name': 'LLDFractal',
-        'nsize': nsize, 'nbasis': nbasis, 'lacunarity':lacunarity,
-        'depth':depth, 'dimension':dimension, 'id': 1, 'ThreshType': 'height'},
-      {'Landtype':'Land', 'Type': 'height', 'TBracket':[0,1], 'Fractal': True,
-        'Colors':[[landhigh_dirt,0],[landhigh,1]], 'Name': 'LHDFractal',
-        'nsize': nsize, 'nbasis': nbasis, 'lacunarity':lacunarity,
-        'depth':depth, 'dimension':dimension, 'id': 2, 'ThreshType': 'height'},
-     {'Landtype':'Land', 'Type': 'normal', 'TBracket':[.1,1], 'Fractal': True,
-        'Colors':[[landlow_rock,0],[landlow_rock2,1]], 'Name': 'LLRFractal',
-        'nsize': nsize2, 'nbasis': nbasis2, 'lacunarity':lacunarity2,
-        'depth':depth2, 'dimension':dimension2, 'id': 3, 'ThreshType': 'normal'},
-      {'Landtype':'Land', 'Type': 'normal', 'TBracket':[.1,1], 'Fractal': True,
-        'Colors':[[landhigh_rock,0],[landhigh_rock2,1]], 'Name': 'LHRFractal',
-        'nsize': nsize2, 'nbasis': nbasis2, 'lacunarity':lacunarity2,
-        'depth':depth2, 'dimension':dimension2, 'id': 4, 'ThreshType': 'normal'},
-     {'Landtype':'Flood', 'Type': 'height', 'TBracket':[0,1], 'Fractal': True,
-        'Colors':[[waterlow,0],[waterlow2,1]], 'Name': 'WLFractal',
-        'nsize': nsize3, 'nbasis': nbasis3, 'lacunarity':lacunarity3,
-        'depth':depth3, 'dimension':dimension3, 'id': 5, 'ThreshType': 'height'},
-      {'Landtype':'Flood', 'Type': 'height', 'TBracket':[0,1], 'Fractal': True,
-        'Colors':[[waterhigh,0],[waterhigh2,1]], 'Name': 'WHFFractal',
-        'nsize': nsize3, 'nbasis': nbasis3, 'lacunarity':lacunarity3,
-        'depth':depth3, 'dimension':dimension3, 'id': 6, 'ThreshType': 'height'}]
+##TM =[{'Landtype':'Land', 'Type': 'height', 'TBracket':[0,1], 'Fractal': True,
+##        'Colors':[[landlow_dirt,0],[landlow,1]], 'Name': 'LLDFractal',
+##        'nsize': nsize, 'nbasis': nbasis, 'lacunarity':lacunarity,
+##        'depth':depth, 'dimension':dimension, 'id': 1, 'ThreshType': 'height'},
+##      {'Landtype':'Land', 'Type': 'height', 'TBracket':[0,1], 'Fractal': True,
+##        'Colors':[[landhigh_dirt,0],[landhigh,1]], 'Name': 'LHDFractal',
+##        'nsize': nsize, 'nbasis': nbasis, 'lacunarity':lacunarity,
+##        'depth':depth, 'dimension':dimension, 'id': 2, 'ThreshType': 'height'},
+##     {'Landtype':'Land', 'Type': 'normal', 'TBracket':[.1,1], 'Fractal': True,
+##        'Colors':[[landlow_rock,0],[landlow_rock2,1]], 'Name': 'LLRFractal',
+##        'nsize': nsize2, 'nbasis': nbasis2, 'lacunarity':lacunarity2,
+##        'depth':depth2, 'dimension':dimension2, 'id': 3, 'ThreshType': 'normal'},
+##      {'Landtype':'Land', 'Type': 'normal', 'TBracket':[.1,1], 'Fractal': True,
+##        'Colors':[[landhigh_rock,0],[landhigh_rock2,1]], 'Name': 'LHRFractal',
+##        'nsize': nsize2, 'nbasis': nbasis2, 'lacunarity':lacunarity2,
+##        'depth':depth2, 'dimension':dimension2, 'id': 4, 'ThreshType': 'normal'},
+##     {'Landtype':'Flood', 'Type': 'height', 'TBracket':[0,1], 'Fractal': True,
+##        'Colors':[[waterlow,0],[waterlow2,1]], 'Name': 'WLFractal',
+##        'nsize': nsize3, 'nbasis': nbasis3, 'lacunarity':lacunarity3,
+##        'depth':depth3, 'dimension':dimension3, 'id': 5, 'ThreshType': 'height'},
+##      {'Landtype':'Flood', 'Type': 'height', 'TBracket':[0,1], 'Fractal': True,
+##        'Colors':[[waterhigh,0],[waterhigh2,1]], 'Name': 'WHFFractal',
+##        'nsize': nsize3, 'nbasis': nbasis3, 'lacunarity':lacunarity3,
+##        'depth':depth3, 'dimension':dimension3, 'id': 6, 'ThreshType': 'height'}]
 
-DCI ={8: waterlow, 9: waterhigh, 15: dark_grass, 16: light_grass,
-      20: rock, 21: dark_rock}
-
-MM = {7: {'id': 7, 'Landtype': 'Flood', 'Ins': (5,6), 'Outs': 7, 'Type':,
-          'normal', 'FactorType' : 'variable', 'FactorVar': 'height',
-          'Factor':0, 'Falloff':0},
-      10: {'id': 10, 'Landtype': 'Flood', 'Ins': (8,9), 'Outs': 10, 'Type':,
-          'normal', 'FactorType' : 'variable', 'FactorVar': 'normal',
-          'Factor':0, 'Falloff':0},
-      11: {'id': 11, 'Landtype': 'Flood', 'Ins': (7,10), 'Outs': 11, 'Type':,
-          'normal', 'FactorType' : 'fixed', 'FactorVar': 'normal',
-          'Factor':.5, 'Falloff':0},
-      12: {'id': 12, 'Landtype': 'Land', 'Ins': (1,2), 'Outs': 12, 'Type':,
-          'normal', 'FactorType' : 'variable', 'FactorVar': 'height',
-          'Factor':0, 'Falloff':0},
-      13: {'id': 13, 'Landtype': 'Land', 'Ins': (15,16), 'Outs': 13, 'Type':,
-          'normal', 'FactorType' : 'variable', 'FactorVar': 'normal',
-          'Factor':0, 'Falloff':0},
-      14: {'id': 14, 'Landtype': 'Land', 'Ins': (12,13), 'Outs': 14, 'Type':,
-          'normal', 'FactorType' : 'fixed', 'FactorVar': 'normal',
-          'Factor':.3, 'Falloff':0},
-      17: {'id': 17, 'Landtype': 'Land', 'Ins': (3,4), 'Outs': 17, 'Type':,
-          'normal', 'FactorType' : 'variable', 'FactorVar': 'height',
-          'Factor':0, 'Falloff':0},
-      18: {'id': 18, 'Landtype': 'Land', 'Ins': (20,21), 'Outs': 18, 'Type':,
-          'normal', 'FactorType' : 'variable', 'FactorVar': 'normal',
-          'Factor':0, 'Falloff':0},
-      19: {'id': 14, 'Landtype': 'Land', 'Ins': (17,18), 'Outs': 19, 'Type':,
-          'normal', 'FactorType' : 'fixed', 'FactorVar': 'normal',
-          'Factor':.5, 'Falloff':0},
-      22: {'id': 22, 'Landtype': 'Land', 'Ins': (14,19), 'Outs': 22, 'Type':,
-          'normal2', 'FactorType' : 'falloff', 'FactorVar': 'normalT',
-          'Factor':.5, 'Falloff':CFK1},
-      }
-
-CIOM = {}
-
-MD = []
-
-NCs = {5:{'Chain':[7,10,11],'Dependencies':[0]},
-       1:{'Chain':[12,13,14],'Dependencies':[0]},
-       3:{'Chain':[17,18,19],'Dependencies':[1]},
-       19:{'Chain:'[22],'Dependencies':[1,3]}}
+##DCI ={8: waterlow, 9: waterhigh, 15: dark_grass, 16: light_grass,
+##      20: rock, 21: dark_rock}
+##
+##MM = {7: {'id': 7, 'Landtype': 'Flood', 'Ins': (5,6), 'Outs': 7, 'Type':,
+##          'normal', 'FactorType' : 'variable', 'FactorVar': 'height',
+##          'Factor':0, 'Falloff':0},
+##      10: {'id': 10, 'Landtype': 'Flood', 'Ins': (8,9), 'Outs': 10, 'Type':,
+##          'normal', 'FactorType' : 'variable', 'FactorVar': 'normal',
+##          'Factor':0, 'Falloff':0},
+##      11: {'id': 11, 'Landtype': 'Flood', 'Ins': (7,10), 'Outs': 11, 'Type':,
+##          'normal', 'FactorType' : 'fixed', 'FactorVar': 'normal',
+##          'Factor':.5, 'Falloff':0},
+##      12: {'id': 12, 'Landtype': 'Land', 'Ins': (1,2), 'Outs': 12, 'Type':,
+##          'normal', 'FactorType' : 'variable', 'FactorVar': 'height',
+##          'Factor':0, 'Falloff':0},
+##      13: {'id': 13, 'Landtype': 'Land', 'Ins': (15,16), 'Outs': 13, 'Type':,
+##          'normal', 'FactorType' : 'variable', 'FactorVar': 'normal',
+##          'Factor':0, 'Falloff':0},
+##      14: {'id': 14, 'Landtype': 'Land', 'Ins': (12,13), 'Outs': 14, 'Type':,
+##          'normal', 'FactorType' : 'fixed', 'FactorVar': 'normal',
+##          'Factor':.3, 'Falloff':0},
+##      17: {'id': 17, 'Landtype': 'Land', 'Ins': (3,4), 'Outs': 17, 'Type':,
+##          'normal', 'FactorType' : 'variable', 'FactorVar': 'height',
+##          'Factor':0, 'Falloff':0},
+##      18: {'id': 18, 'Landtype': 'Land', 'Ins': (20,21), 'Outs': 18, 'Type':,
+##          'normal', 'FactorType' : 'variable', 'FactorVar': 'normal',
+##          'Factor':0, 'Falloff':0},
+##      19: {'id': 14, 'Landtype': 'Land', 'Ins': (17,18), 'Outs': 19, 'Type':,
+##          'normal', 'FactorType' : 'fixed', 'FactorVar': 'normal',
+##          'Factor':.5, 'Falloff':0},
+##      22: {'id': 22, 'Landtype': 'Land', 'Ins': (14,19), 'Outs': 22, 'Type':,
+##          'normal2', 'FactorType' : 'falloff', 'FactorVar': 'normalT',
+##          'Factor':.5, 'Falloff':CFK1},
+##      }
+##
+##CIOM = {}
+##
+##MD = []
+##
+##NCs = {5:{'Chain':[7,10,11],'Dependencies':[0]},
+##       1:{'Chain':[12,13,14],'Dependencies':[0]},
+##       3:{'Chain':[17,18,19],'Dependencies':[1]},
+##       19:{'Chain:'[22],'Dependencies':[1,3]}}
 
 def cubicInterpolate(p,x):
 	return p[1]+.5*x*(-1.0*p[0]+p[2])+x*x*(p[0]-5.0/2.0*p[1]+2.0*p[2]-.5*p[3])+x*x*x*(-.5*p[0]+1.5*p[1]-1.5*p[2]+.5*p[3])
@@ -506,7 +506,7 @@ def multiply(c1, c2):
           tcolor[g] = c1l[g]*c2l[g]
      return tuple(tcolor)
 
-def screen(c1, c2)
+def screen(c1, c2):
      ## assumed color values are normalized rgb channels
      tcolor = [0,0,0]
      c1l = list(c1)
@@ -515,7 +515,7 @@ def screen(c1, c2)
           tcolor[g] = 1-1*(1-c1l[g])*(1-c2l[g])
      return tuple(tcolor)
 
-def overlay(c1, c2)
+def overlay(c1, c2):
      ## assumed color values are normalized rgb channels
      tcolor = [0,0,0]
      c1l = list(c1)
@@ -527,7 +527,7 @@ def overlay(c1, c2)
                tcolor[g] = clamp2(1-2*(1-c1l[g])*(1-c2l[g]))
      return tuple(tcolor)
 
-def hardlight(c1, c2)
+def hardlight(c1, c2):
      ## assumed color values are normalized rgb channels
      tcolor = [0,0,0]
      c1l = list(c1)
@@ -539,7 +539,7 @@ def hardlight(c1, c2)
                tcolor[g] = clamp2(1-2*(1-c1l[g])*(1-c2l[g]))
      return tuple(tcolor)
 
-def softlight(c1, c2)
+def softlight(c1, c2):
      ## assumed color values are normalized rgb channels
      tcolor = [0,0,0]
      c1l = list(c1)
@@ -586,7 +586,7 @@ def burn(c1,c2, mode):
                tcolor[g] = clamp2(1-1*(c1l[g]+c2l[g]))
      return tuple(tcolor)
 
-def vividlight(c1, c2)
+def vividlight(c1, c2):
      ## assumed color values are normalized rgb channels
      tcolor = [0,0,0]
      c1l = list(c1)
