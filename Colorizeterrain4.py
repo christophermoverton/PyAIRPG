@@ -1291,6 +1291,12 @@ def setMixColor(MM,CIOM,mID,h, nz, hmax=hmax, NORM=NORM, normdiff=normdiff,
           CIOM[out1] = lightenonly(in1,in2)
      CIOM[out1] = rnormalizecolor(CIOM[out1])
 
+def getLastColorOut(MD, MM):
+##     lmd = list(MD.keys())
+     lenmd = len(MD)
+     lkey = MD[lenmd-1]
+     return MM[lkey]['Outs']
+
 FM = (flood,mount)
 origin = (origin_x,origin_y) ## randomized fractal origin position
 for j in range(dimY):
@@ -1333,7 +1339,8 @@ for j in range(dimY):
              ## next iterate MD for mixing
              for mix in MD:
                   setMixColor(MM,CIOM,mix,h, nz)
-                       
+             outid = getLastColorOut(MD, MM)
+             newcolor = CIOM[outid]
 ##            ncoords3 = (i /nsize3 + origin_x, j/ nsize3 + origin_y,
 ##                        0.0 + origin_z)
 ##            gval6 = fractal(ncoords3,dimension3,lacunarity3,depth3,nbasis3)
@@ -1442,7 +1449,9 @@ for j in range(dimY):
 ##                    newcolor = lerpcolor(dark_rock,rock,(h-flood)/(mount-flood))
         ## assign the newcolor to the blender image pixel indices per channel
         r,g,b = newcolor
-        
+        CIOM = {}
+        MD = []
+        MD_Dependencies = []
         ##rchi,gchi,bchi,achi = getpixel((i,j))
         if not (0<= r < 256):
                 print('r out of bounds')

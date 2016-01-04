@@ -28,7 +28,7 @@ rock = (145,148,141)
 dark_rock = (94,94,94)
 light_grass = (122,227,84)
 dark_grass = (94,168,67)
-nsize = 150.0 ## ranges from .01 to 10000 (used in fractalizing terrain coloring)
+nsize = 150.0 ## ranges from .01 to 10000 (used in fractalizing terrain coloring) land grass gradient texture
 nsize2 = 40.0
 nsize3 = 40.0 ## high water fractal texturing
 nbasis = 3 ## default 0 for Blender
@@ -46,7 +46,7 @@ cf = {.05:[-4384.9,75.6728,27.1786,-1.11022e-16],
 .5:[0.646465,-4.49285,4.08481,-2.22045e-16],
 .6:[1.60934,-4.94142,4.05216,0.0],
 .7:[2.32556,-5.33564,4.02399,0.0]}
-CFK1 = .3
+CFK1 = .3  
 CFK2 = .1
 
 ## normal thresholding module how it works:
@@ -799,7 +799,7 @@ Scalefy = dimY / vdim ## scale factor y dimension
 ## To iterate vertices and determine min max on xy range
 maxvi = 0
 minvi = 0
-maxvcox = -1*float('inf')
+maxvcox = -1*float('inf')  ## negative infinity
 maxvcoy = -1*float('inf')
 hmax = -1*float('inf')
 minvcox = float('inf')
@@ -812,8 +812,8 @@ minnormz = float('inf')
 maxvhi = 0
 minvhi = 0
 for v in bm.verts:
-    x,y,h = v.co
-    nz = v.normal[2]
+    x,y,h = v.co  ## v is a vertex and v.co is the coordinate data
+    nz = v.normal[2] ## 
     if x < minvcox and y < minvcoy:
         minvi = v.index
         minvcox = x
@@ -840,15 +840,15 @@ Scalefy = dimY/abs(maxvcoy - minvcoy)
 trf = [trfacx,trfacy]
 scf = [Scalefx,Scalefy]
 normdiff = abs(maxnormz - minnormz)
-cscale = .1
+cscale = .1  ## can adjust 0 to 1
 
 
      
 if minnormz < 0 and maxnormz < 0:
-     normcutoff = minnormz + cscale*normdiff  ## you can increase or decrease 2nd term to change width of rock banding
+     normcutoff = minnormz + cscale*normdiff  ## you can increase or decrease cscale term to change width of rock banding
      NORM = 0
 else:
-     normcutoff = maxnormz - cscale*normdiff
+     normcutoff = maxnormz - cscale*normdiff 
      NORM = 1
 diff = abs(hmax-hmin)
 flood=0.01  ## flood plain
