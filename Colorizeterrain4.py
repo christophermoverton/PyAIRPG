@@ -1101,7 +1101,7 @@ for t in TM:
           tm_mount[t['id']] = t
           
 gval5 = 0
-
+FM = (flood,mount)
 def getCutoffs(t, h, nz, hdiff, hmin, NORM, normdiff,
                minnormz, maxnormz, t1, t2):
      if t['ThreshType'] == 'height':
@@ -1113,13 +1113,16 @@ def getCutoffs(t, h, nz, hdiff, hmin, NORM, normdiff,
           t1 = getNormcutoff(NORM, normdiff, minnormz, maxnormz, cs1)
           t2 = getNormcutoff(NORM, normdiff, minnormz, maxnormz, cs2)
 
-def checktm(t, h, nz, hdiff, hmin, NORM, normdiff,
-            minnormz, maxnormz, t1, t2):
+def checktm(t, h, nz, thrshs, hdiff = hdiff, hmin = hmin, NORM = NORM,
+            normdiff = normdiff, minnormz = minnormz, maxnormz = maxnormz):
 ##     print(t)
      if t['ThreshType'] == 'height':
           cs1,cs2 = t['TBracket']
+          t1, t2 = thrshs
           t1 = getHeightcutoff(hdiff, hmin, cs1)
           t2 = getHeightcutoff(hdiff, hmin, cs2)
+          thrshs[0] = t1
+          thrshs[1] = t2
           if t2 >= h >= t1:
                return True
           else:
@@ -1188,8 +1191,8 @@ def setMixColor(MM,CIOM,mID,h, nz, hmax=hmax, NORM=NORM, normdiff=normdiff,
      ##     'Factor':0, 'Falloff':0},
      flood,mount = FM
      in1,in2 = MM[mID]['Ins']
-     in1 = normalizecolor(in1)
-     in2 = normalizecolor(in2)
+     in1 = normalizecolor(CIOM[in1])
+     in2 = normalizecolor(CIOM[in2])
      out1 = MM[mID]['Outs']
      if MM[mID]['FactorType'] == 'variable':
           if MM[mID]['FactorVar'] == 'height':
@@ -1297,7 +1300,7 @@ def getLastColorOut(MD, MM):
      lkey = MD[lenmd-1]
      return MM[lkey]['Outs']
 
-FM = (flood,mount)
+
 origin = (origin_x,origin_y) ## randomized fractal origin position
 for j in range(dimY):
     for i in range(dimX):
@@ -1316,25 +1319,26 @@ for j in range(dimY):
              for thr in tm_flood:
                   t1 = 0
                   t2 = 0
-                  if checktm(tm_flood[thr], h, nz, hdiff, hmin, NORM, normdiff,
-                             minnormz, maxnormz, t1, t2):
-                       thrshs = (t1,t2)
+                  thrshs = [t1,t2]
+                  if checktm(tm_flood[thr], h, nz, thrshs):
+                       ##thrshs = [t1,t2]
                        ## assign to ColorInOut
-                       CIOM[t['id']] = getThColor(tm_flood[thr], h, nz,
-                                                  ijorigin, thrshs)
+                       CIOM[thr] = getThColor(tm_flood[thr], h, nz,
+                                              ijorigin, thrshs)
+                       ##print('saved CIOM')
              ## Load DCI from DCI_LTYPE into CIOM
              for dci in DCI_LTYPE['Flood']:
                   CIOM[dci] = DCI[dci]
              ## next check CIOM for NCs (Node chains) these will be aded to MD
              for ci in CIOM:
                   if ci in NCs:
-                       if NCs[ci]['Dependencies'] != -1:
+                       if NCs[ci]['Dependencies'][0] != -1:
                             for dep in NCs[ci]['Dependencies']:
                                  if dep in MD_Dependencies:
                                       MD += NCs[ci]['Chain']
                                       MD_Dependencies.append(ci)
                        else:
-                            MD+= NCs[ci]
+                            MD+= NCs[ci]['Chain']
                             MD_Dependencies.append(ci)
              ## next iterate MD for mixing
              for mix in MD:
