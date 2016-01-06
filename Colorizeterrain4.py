@@ -48,7 +48,7 @@ cf = {.05:[-4384.9,75.6728,27.1786,-1.11022e-16],
 .5:[0.646465,-4.49285,4.08481,-2.22045e-16],
 .6:[1.60934,-4.94142,4.05216,0.0],
 .7:[2.32556,-5.33564,4.02399,0.0]}
-CFK1 = .3
+CFK1 = .5
 CFK2 = .1
 FM = (0,0)
 
@@ -280,11 +280,11 @@ TM =[{'Landtype':'Land', 'Type': 'height', 'TBracket':[floodn,mountn], 'Fractal'
         'Colors':[[mountlow,0],[mounthigh,1]], 'Name': 'MountainThreshold',
         'nsize': nsize3, 'nbasis': nbasis3, 'lacunarity':lacunarity3,
         'depth':depth3, 'dimension':dimension3, 'id': 23, 'ThreshType': 'heightT'},
-      {'Landtype':'Land', 'Type': 'heightT', 'TBracket':[mountn,1],
+      {'Landtype':'Land', 'Type': 'normal', 'TBracket':[0,1],
        'TBracket2': [CFK2,-float('inf')],'Fractal': False,
         'Colors':[[mountlow,0],[mounthigh,1]], 'Name': 'MountainNormal',
         'nsize': nsize3, 'nbasis': nbasis3, 'lacunarity':lacunarity3,
-        'depth':depth3, 'dimension':dimension3, 'id': 24, 'ThreshType': 'heightT'},
+        'depth':depth3, 'dimension':dimension3, 'id': 24, 'ThreshType': 'normal'},
       {'Landtype':'Land', 'Type': 'heightT', 'TBracket':[0,floodn],
        'TBracket2': [-1,CFK2],'Fractal': True,
         'Colors':[[waterlow,0],[waterlow2,1]], 'Name': 'WaterLowLandThreshold',
@@ -306,7 +306,7 @@ MM = {7: {'id': 7, 'Landtype': 'Flood', 'Ins': (5,6), 'Outs': 7, 'Type':
           'Factor':0, 'Falloff':0, 'MainOut': True},
       10: {'id': 10, 'Landtype': 'Flood', 'Ins': (8,9), 'Outs': 10, 'Type':
           'normal', 'FactorType' : 'variable', 'FactorVar': 'normal',
-          'Factor':0, 'Falloff':0, 'MainOut': True},
+          'Factor':0, 'Falloff':0, 'TBracket' : [0,1],'MainOut': True},
       11: {'id': 11, 'Landtype': 'Flood', 'Ins': (7,10), 'Outs': 11, 'Type':
           'normal', 'FactorType' : 'fixed', 'FactorVar': 'normal',
           'Factor':.5, 'Falloff':0, 'MainOut': True},
@@ -315,7 +315,7 @@ MM = {7: {'id': 7, 'Landtype': 'Flood', 'Ins': (5,6), 'Outs': 7, 'Type':
           'Factor':0, 'Falloff':0, 'MainOut': True},
       13: {'id': 13, 'Landtype': 'Land', 'Ins': (15,16), 'Outs': 13, 'Type':
           'normal', 'FactorType' : 'variable', 'FactorVar': 'normal',
-          'Factor':0, 'Falloff':0, 'MainOut': True},
+          'Factor':0, 'Falloff':0, 'TBracket' : [0,1],'MainOut': True},
       14: {'id': 14, 'Landtype': 'Land', 'Ins': (12,13), 'Outs': 14, 'Type':
           'normal', 'FactorType' : 'fixed', 'FactorVar': 'normal',
           'Factor':.3, 'Falloff':0, 'MainOut': True},
@@ -324,8 +324,8 @@ MM = {7: {'id': 7, 'Landtype': 'Flood', 'Ins': (5,6), 'Outs': 7, 'Type':
           'Factor':0, 'Falloff':0, 'MainOut': True},
       18: {'id': 18, 'Landtype': 'Land', 'Ins': (20,21), 'Outs': 18, 'Type':
           'normal', 'FactorType' : 'variable', 'FactorVar': 'normal',
-          'Factor':0, 'Falloff':0, 'MainOut': True},
-      19: {'id': 14, 'Landtype': 'Land', 'Ins': (17,18), 'Outs': 19, 'Type':
+          'Factor':0, 'Falloff':0, 'TBracket' : [.1,1],'MainOut': True},
+      19: {'id': 19, 'Landtype': 'Land', 'Ins': (17,18), 'Outs': 19, 'Type':
           'normal', 'FactorType' : 'fixed', 'FactorVar': 'normal',
           'Factor':.5, 'Falloff':0, 'MainOut': True},
       22: {'id': 22, 'Landtype': 'Land', 'Ins': (14,19), 'Outs': 22, 'Type':
@@ -334,23 +334,23 @@ MM = {7: {'id': 7, 'Landtype': 'Flood', 'Ins': (5,6), 'Outs': 7, 'Type':
            'FalloffEndPts': [.1], 'MainOut': True},
       25: {'id': 25, 'Landtype': 'Land', 'Ins': (23,24), 'Outs': 25, 'Type':
           'normal', 'FactorType' : 'fixed', 'FactorVar': 'normal',
-          'Factor':.5, 'Falloff':0, 'MainOut': True},      
+          'Factor':.5, 'Falloff':0, 'MainOut': False},      
       26: {'id': 26, 'Landtype': 'Land', 'Ins': (0,25), 'Outs': 26, 'Type':
           'normal2', 'FactorType' : 'falloff', 'FactorVar': 'heightT',
-          'Factor':.5, 'Falloff':[CFK1, -1], 'TBracket' : [mountn,1],
+          'Factor':.5, 'Falloff':[CFK2, -1], 'TBracket' : [mountn,1],
            'FalloffEndPts': [.1], 'MainOut': True},
       29: {'id': 29, 'Landtype': 'Land', 'Ins': (27,28), 'Outs': 29, 'Type':
           'normal', 'FactorType' : 'variable', 'FactorVar': 'height2',
           'Factor':.5, 'Falloff':0, 'MainOut': False, 'Landtype2': 'Flood'},
       30: {'id': 30, 'Landtype': 'Land', 'Ins': (8,9), 'Outs': 30, 'Type':
           'normal', 'FactorType' : 'variable', 'FactorVar': 'normal',
-          'Factor':.5, 'Falloff':0, 'MainOut': False},
+          'Factor':.5, 'Falloff':0, 'TBracket' : [.1,1],'MainOut': False},
       31: {'id': 31, 'Landtype': 'Land', 'Ins': (29,30), 'Outs': 31, 'Type':
           'normal', 'FactorType' : 'fixed', 'FactorVar': 'normal',
           'Factor':.5, 'Falloff':0, 'MainOut': False},
       32: {'id': 32, 'Landtype': 'Land', 'Ins': (0,31), 'Outs': 32, 'Type':
           'normal2', 'FactorType' : 'falloff', 'FactorVar': 'heightT',
-          'Factor':.5, 'Falloff':[-1, CFK1], 'TBracket' : [0,floodn],
+          'Factor':.5, 'Falloff':[-1, CFK2], 'TBracket' : [0,floodn],
            'FalloffEndPts': [.1], 'MainOut': True}
       }
 
@@ -364,8 +364,8 @@ MD_Dependencies = []
 ## out of order chains.
 NCs = {5:{'Chain':[7,10,11],'Dependencies':[-1]},
        1:{'Chain':[12,13,14],'Dependencies':[-1]},
-       3:{'Chain':[17,18,19],'Dependencies':[1]},
-       19:{'Chain':[22],'Dependencies':[1,3]},
+       3:{'Chain':[17,18,19,22],'Dependencies':[1]},
+##       19:{'Chain':[22],'Dependencies':[-1]}
        23:{'Chain':[25,26],'Dependencies':[-1]},
        27:{'Chain':[29,30,31,32],'Dependencies':[-1]}
        }
@@ -1033,7 +1033,7 @@ for f in bm.faces:
             if not BICUBIC:
                 h = bilinear_interpolation(float(i),
                                            float(j), heights) ## bilinearly interpolated height for uv
-                h += -1*hmin
+##                h += -1*hmin
                 heightmap2[(i,j)] = h
                 normalmap[(i,j)] = bilinear_interpolation(float(i),
                                                           float(j),
@@ -1121,6 +1121,10 @@ def getCutoffs(t, h, nz, hdiff, hmin, NORM, normdiff,
           cs1,cs2 = t['TBracket']
           t1 = getNormcutoff(NORM, normdiff, minnormz, maxnormz, cs1)
           t2 = getNormcutoff(NORM, normdiff, minnormz, maxnormz, cs2)
+     elif t['FactorVar'] == 'normal':
+          cs1,cs2 = t['TBracket']
+          t1 = getNormcutoff(NORM, normdiff, minnormz, maxnormz, cs1)
+          t2 = getNormcutoff(NORM, normdiff, minnormz, maxnormz, cs2)
      t1t2[0] = t1
      t1t2[1] = t2
 
@@ -1182,8 +1186,8 @@ def getThColor(t, h, nz, ijorigin, thrshs):
      i, j, origin = ijorigin
      
      if t['Fractal']:
-          ncoord = (i/t['nsize'] + origin[0], j/t['nsize'] + origin[0],
-                    0.0+origin[1])
+          ncoord = (i/t['nsize'] + origin[0], j/t['nsize'] + origin[1],
+                    0.0+origin[2])
           gval = fractal(ncoord, t['dimension'],t['lacunarity'],t['depth'],
                          t['nbasis'])
           gval += 1
@@ -1213,6 +1217,8 @@ def setMixColor(MM,CIOM,mID,h, nz, hmax=hmax, NORM=NORM, normdiff=normdiff,
      in1,in2 = MM[mID]['Ins']
      in1 = normalizecolor(CIOM[in1])
      in2 = normalizecolor(CIOM[in2])
+##     in1 = CIOM[in1]
+##     in2 = CIOM[in2]
      out1 = MM[mID]['Outs']
      if MM[mID]['FactorType'] == 'variable':
           if MM[mID]['FactorVar'] == 'height':
@@ -1223,10 +1229,15 @@ def setMixColor(MM,CIOM,mID,h, nz, hmax=hmax, NORM=NORM, normdiff=normdiff,
                elif MM[mID]['Landtype'] == 'Mount':
                     gval = (abs(h - mount))/(abs(mount - hmax))
           elif MM[mID]['FactorVar'] == 'normal':
-               if NORM:
-                    gval = (abs(maxnormz - nz))/abs(normdiff)
-               else:
-                    gval = (abs(minnormz - nz))/abs(normdiff)
+##               if NORM:
+##                    gval = (abs(maxnormz - nz))/abs(normdiff)
+##               else:
+##                    gval = (abs(minnormz - nz))/abs(normdiff)
+               t1t2 = [0,0]
+               getCutoffs(MM[mID], h, nz, hdiff, hmin, NORM, normdiff,
+                           minnormz, maxnormz, t1t2)
+               t1,t2 = t1t2
+               gval = (abs(nz-t1)/abs(t1-t2))
           elif MM[mID]['FactorVar'] == 'height2':
                ## 'height2' for 'FactorVar' only works with 'Landtype' == 'Land'
                ## note these formulation do not gaurantee that 0<=gval<=1
@@ -1258,14 +1269,16 @@ def setMixColor(MM,CIOM,mID,h, nz, hmax=hmax, NORM=NORM, normdiff=normdiff,
                rncdiff2 = abs((z-t2)/(t1-t2))
                if rncdiff1 > MM[mID]['Falloff'][0]:
                     gval1 = 1
+##                    print('z', z)
                else:
                     gval1 = getCubicY(cf[CFK1],rncdiff1)
+##                    print(gval1)
                if rncdiff2 > MM[mID]['Falloff'][1]:
                     gval2 = 1
                else:
                     gval2 = getCubicY(cf[CFK1],rncdiff2)
                gval = min(gval1,gval2)
-               gval = 1-gval
+##               gval = 1-gval
           elif MM[mID]['FactorVar'] == 'heightT':
                t1t2 = [0,0]
                getCutoffs(MM[mID], h, nz, hdiff, hmin, NORM, normdiff,
@@ -1327,9 +1340,9 @@ def getLastColorOut(MD, MM):
      lenmd = len(MD)
      lkey = MD[lenmd-1]
      return MM[lkey]['Outs']
+lcount = 0
 
-
-origin = (origin_x,origin_y) ## randomized fractal origin position
+origin = (origin_x,origin_y,origin_z) ## randomized fractal origin position
 for j in range(dimY):
     for i in range(dimX):
         if not (i,j) in normalmap:
@@ -1416,10 +1429,22 @@ for j in range(dimY):
                             MD+= NCs[ci]['Chain']
                             MD_Dependencies.append(ci)
              ## next iterate MD for mixing
+
              for mix in MD:
                   setMixColor(MM,CIOM,mix,h, z)
              ##outid = getLastColorOut(MD, MM)
              newcolor = CIOM[0]
+##             if lcount < 20:
+##                  tes1 = 19 in CIOM
+##                  tes2 = 22 in CIOM
+##                  tes3 = 3 in CIOM
+##                  tes4 = 17 in CIOM
+##                  tes5 = 18 in CIOM
+##                  if tes3:
+##                       print('test 1 ', tes1, ' test 2 ', tes2,
+##                             'test 3 ', tes3, ' test 4 ', tes4,
+##                             'test 5 ', tes5)
+##                       lcount += 1
 ##            ncoords = ( i / nsize + origin_x, j / nsize+origin_y,
 ##                        0.0 + origin_z )
 ##            ncoords2 = (i /nsize2 + origin_x, j/ nsize2 + origin_y,
