@@ -1,5 +1,5 @@
 Colors = {}
-TM = {}
+TM = []
 DCI = {}
 DCI_LTYPE = {}
 MM = {}
@@ -398,10 +398,15 @@ def setColorPosition(tmcolorsdict):
                 pos = None
                 if DoYouWantToQuit():
                     break
+            if not 0.0 <= pos <= 1.0:
+                print("Color position is not valid.  Needs to be a float between 0 and 1. ")
+                pos = None
+                if DoYouWantToQuit():
+                    break
             else:
                 a1 = False
         except:
-            print("Not a valid entry")
+            print("Not a valid entry.")
             if DoYouWantToQuit():
                 break
     return pos
@@ -432,62 +437,65 @@ def getColorNameMenu(tmcolorsdict, Colors=Colors):
     return returnstr
 
 def getColorValue(tmcolorsdict):
-    a2 = True
-    tmcolorvalues = list(tmcolorsdict.values())
-    rcolorval = 0
-    bcolorval = 0
-    gcolorval = 0
+    a1 = True
     colorval = (None,None,None)
-    while a2:
-        ans=raw_input("Please add a Red color value (RGB) (0-255 integer per channel) format: \n")
-        rcolorval = ans
-        try:
-            rcolorval = int(rcolorval)
-            a2 = False
-        except:
-            print("Not a valid colorvalue.")
-            continue
-    a2 = True
-    while a2:
-        ans=raw_input("Please add a Green color value (RGB) (0-255 integer per channel) format: \n")
-        gcolorval = ans
-        try:
-            gcolorval = int(gcolorval)
-            a2 = False
-        except:
-            print("Not a valid colorvalue.")
-            continue
-    a2 = True
-    while a2:
-        ans=raw_input("Please add a Blue color value (RGB) (0-255 integer per channel) format: \n")
-        bcolorval = ans
-        try:
-            bcolorval = int(bcolorval)
-            a2 = False
-        except:
-            print("Not a valid colorvalue.")
-            continue
-    colorval = (rcolorval,gcolorval,bcolorval)
-    if colorval in tmcolorvalues:
-        print("Color already in TMColorsdict.")
-        if DoYouWantToKeep():
-            a1 = False
+    while a1:
+        a2 = True
+        tmcolorvalues = list(tmcolorsdict.values())
+        rcolorval = 0
+        bcolorval = 0
+        gcolorval = 0
+
+        while a2:
+            ans=raw_input("Please add a Red color value (RGB) (0-255 integer per channel) format: \n")
+            rcolorval = ans
+            try:
+                rcolorval = int(rcolorval)
+                a2 = False
+            except:
+                print("Not a valid colorvalue.")
+                continue
+        a2 = True
+        while a2:
+            ans=raw_input("Please add a Green color value (RGB) (0-255 integer per channel) format: \n")
+            gcolorval = ans
+            try:
+                gcolorval = int(gcolorval)
+                a2 = False
+            except:
+                print("Not a valid colorvalue.")
+                continue
+        a2 = True
+        while a2:
+            ans=raw_input("Please add a Blue color value (RGB) (0-255 integer per channel) format: \n")
+            bcolorval = ans
+            try:
+                bcolorval = int(bcolorval)
+                a2 = False
+            except:
+                print("Not a valid colorvalue.")
+                continue
+        colorval = (rcolorval,gcolorval,bcolorval)
+        if colorval in tmcolorvalues:
+            print("Color already in TMColorsdict.")
+            if DoYouWantToKeep():
+                a1 = False
+            else:
+                if DoYouWantToQuit():
+                    break
         else:
-            if DoYouWantToQuit():
-                break
-    else:
-        a1 = False
-    print("""You entered """, colorval, """ color values.""")
-    ans = raw_input("Is this correct? (Y/N)")
-    if ans == "Y" or ans == "y":
-        a1 = False
+            a1 = False
+        print("""You entered """, colorval, """ color values.""")
+        ans = raw_input("Is this correct? (Y/N)")
+        if ans == "Y" or ans == "y":
+            a1 = False
     
     return colorval
 
 def TMColorInputMenu(tmcolorsdict, Colors=Colors):
     a1 = True
     while a1:
-                print ("""
+        print ("""
         1.Add existing color from Colors Dictionary
         2.Show colors from Colors Dictionary
         3.Input manually an RGB color value
@@ -668,13 +676,13 @@ def TMColorsMenu(tmcolorsdict, Colors = Colors):
             print(len(tmcolorsdict)) 
 
         elif ans=="3":
-            TMColorInputMenu()
+            TMColorInputMenu(tmcolorsdict)
             print("Left the TM Color input menu.")
         elif ans=="4":
-            color = TMDeleteColorMenu()
+            color = TMDeleteColorMenu(tmcolorsdict)
             print("""Deleted: """, color)
         elif ans=="5":
-            color = TMColorChangeMenu()
+            color = TMColorChangeMenu(tmcolorsdict)
             print(color, " changed.")
         elif ans=="6":
           print("\n Going back to the main menu!")
@@ -693,8 +701,31 @@ def AreYouSureQuit():
         toquit = True
     return toquit
 
+def GetTBpositionMenu():
+    a1 = True
+    pos = None
+    while a1:
+        ans = raw_input("Enter the position[float from 0 to 1]: ")
+        try:
+            pos = float(ans)
+
+            if not 0.0 <= pos <= 1.0:
+                print("Color position is not valid.  Needs to be a float between 0 and 1. ")
+                pos = None
+                if DoYouWantToQuit():
+                    break
+            else:
+                a1 = False
+        except:
+            print("Not a valid entry.")
+            if DoYouWantToQuit():
+                break
+    return pos    
+
 def TMInputMenu(Colors=Colors, TM = TM, maxindex = maxindex):
     a1 = True
+    tmdat = {}
+    rtmdat = {}
     while a1:
         tmindex = maxindex
         NamegetMenu()
@@ -702,11 +733,12 @@ def TMInputMenu(Colors=Colors, TM = TM, maxindex = maxindex):
         while a2:
             landtype = LandtypeGetMenu()
             if landtype == 'abort':
-                if AreYousureQuit():
+                if AreYouSureQuit():
                     a2 = False
                     a1 = False
-                    continue
+                    break
             else:
+                tmdat['Landtype']=landtype
                 a2 = False
                     
         if not a1:
@@ -715,68 +747,108 @@ def TMInputMenu(Colors=Colors, TM = TM, maxindex = maxindex):
         while a2:
             ttype = TypeGetMenu()
             if ttype == 'abort':
-                if AreYousureQuit():
+                if AreYouSureQuit():
                     a2 = False
                     a1 = False
-                    continue
+                    break
             else:
+                tmdat['Type'] = ttype
+                tmdat['ThreshType'] = ttype
                 a2 = False
                     
         if not a1:
             break
         fractal = FractalMenu()
         if fractal:
+            tmdat['Fractal'] = True
             a2 = True
             while a2:
                 fractaldict = FractalMenu2()
                 if 'abort' in fractaldict:
-                    if AreYousureQuit():
+                    if AreYouSureQuit():
                         a2 = False
                         a1 = False
-                        continue
+                        break
                 else:
+                    for fdkey in fractaldict:
+                        tmdat[fdkey] = fractaldict[fdkey]
                     a2 = False
+        else:
+            tmdat['Fractal'] = False
         if not a1:
             break
         tmcolorsdict = {}
         TMColorsMenu(tmcolorsdict)
-        while a2:
-            ans=raw_input("Please add a Red color value (RGB) (0-255 integer per channel) format: \n")
-            rcolorval = ans
-            try:
-                rcolorval = int(rcolorval)
-                a2 = False
-            except:
-                print("Not a valid colorvalue.")
-                continue
+        col=[]
+        tmckeys = list(tmcolorsdict.keys())
+        tmckeys.sort()
+        for tmckey in tmckeys:
+            col.append([tmcolorsdict[tmckey],tmckey])
+        tmdat['Colors'] = col
         a2 = True
         while a2:
-            ans=raw_input("Please add a Green color value (RGB) (0-255 integer per channel) format: \n")
-            gcolorval = ans
-            try:
-                gcolorval = int(gcolorval)
-                a2 = False
-            except:
-                print("Not a valid colorvalue.")
-                continue
-        a2 = True
-        while a2:
-            ans=raw_input("Please add a Blue color value (RGB) (0-255 integer per channel) format: \n")
-            bcolorval = ans
-            try:
-                bcolorval = int(bcolorval)
-                a2 = False
-            except:
-                print("Not a valid colorvalue.")
-                continue
-        colorval = (rcolorval,gcolorval,bcolorval)
-        print("""You entered """, colorname, """ for the color name.""")
-        print("""You entered """, colorval, """ color values.""")
+            print ("First TBracket entry position this should be a lower value relative a second entry.")
+            tbrackpos1 = GetTBpositionMenu()
+            if tbrackpos1 == None:
+                print("No entry.")
+                if DoYouWantToQuit():
+                    a1 = False
+                    break
+            else:
+                print("Second TBracket entry position this should be > first.")
+                tbrackpos2 = GetTBpositionMenu()
+                if tbrackpos2 == None:
+                    print("No 2nd entry.")
+                    if DoYouWantToQuit():
+                        a1 = False
+                        break
+                else:
+                    if tbrackpos1 > tbrackpos2:
+                        print("2nd entry greater than the first.")
+                        print("We'll swap these.")
+                        tbrackpos2a = tbrackpos1
+                        tbrackpos1 = tbrackpos2
+                        tbrackpos2 = tbrackpos2a
+                    tmdat['TBracket'] = [tbrackpos1,tbrackpos2]
+                    a2 = False
+        if not a1:
+            break
+        if ttype == 'heightT':
+            a2 = True
+            while a2:
+                print ("First TBracket2 entry position this should be a lower value relative a second entry.")
+                tbrackpos3 = GetTBpositionMenu()
+                if tbrackpos3 == None:
+                    print("No entry.")
+                    if DoYouWantToQuit():
+                        a1 = False
+                        break
+                else:
+                    print("Second TBracket2 entry position this should be > first.")
+                    tbrackpos4 = GetTBpositionMenu()
+                    if tbrackpos4 == None:
+                        print("No 2nd entry.")
+                        if DoYouWantToQuit():
+                            a1 = False
+                            break
+                    else:
+                        if tbrackpos3 > tbrackpos4:
+                            print("2nd entry greater than the first.")
+                            print("We'll swap these.")
+                            tbrackpos4a = tbrackpos3
+                            tbrackpos3 = tbrackpos4
+                            tbrackpos4 = tbrackpos4a
+                        tmdat['TBracket2'] = [tbrackpos3,tbrackpos4]
+                        a2 = False
+        if not a1:
+            break            
+        
+        print("""You entered """, tmdat)
         ans = raw_input("Is this correct? (Y/N)")
         if ans == "Y" or ans == "y":
+            rtmdat = tmdat.copy()
             a1 = False
-    Colors[colorname] = colorval
-    return colorname
+    return rtmdat
 
 def TMMenu(TM=TM):
     ans=True
@@ -802,14 +874,19 @@ def TMMenu(TM=TM):
         elif ans=="3":
             print("There are ",len(TM)," TMs")
         elif ans=="4":
-            tmname = TMInputMenu()
-            print("""TM name: """, tmname, """ added.""")
+            tmdat = TMInputMenu()
+            if len(tmdat) == 0:
+                print("TM Data input aborted!")
+            else:
+                TM.append(tmdat)
+                print("TM Data input received and added.")
+##            print("""TM name: """, tmname, """ added.""")
         elif ans=="5":
-            tmname = DeleteTMMenu()
-            print("""Deleted: """, tmname)
+            ##tmname = DeleteTMMenu()
+            print("""Deleted: nothing yet""")
         elif ans=="6":
-            tmname = TMChangeMenu()
-            print(tmname, " changed.")
+##            tmname = TMChangeMenu()
+            print("Nothing changed.")
         elif ans=="7":
           print("\n Going back to the main menu!")
           ans = False
@@ -836,7 +913,7 @@ def MainMenu():
             ColorMenu()
             print("Leaving Color Menu...")
         elif ans=="2":
-            print("not there yet.")
+            TMMenu()
     ##      print("\n Student Deleted") 
         elif ans=="3":
             print("not there yet.")
