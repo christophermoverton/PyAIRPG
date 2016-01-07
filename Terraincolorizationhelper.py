@@ -187,7 +187,7 @@ def incrementMaxIndex(maxindex = maxindex):
     maxindex[0] += 1
     
 def NamegetMenu():
-    ans = raw_input("Please add a name: /n")
+    ans = raw_input("Please add a name: ")
     return str(ans)
 
 def LandtypeGetMenu():
@@ -728,7 +728,8 @@ def TMInputMenu(Colors=Colors, TM = TM, maxindex = maxindex):
     rtmdat = {}
     while a1:
         tmindex = maxindex
-        NamegetMenu()
+        name = NamegetMenu()
+        tmdat['Name'] = name
         a2 = True
         while a2:
             landtype = LandtypeGetMenu()
@@ -894,7 +895,131 @@ def DeleteTMMenu(TM=TM):
         elif ans =="3":
             ans = False
         elif ans !="":
-          print("\n Not Valid Choice Try again")            
+          print("\n Not Valid Choice Try again")
+
+def ChangeMore():
+    ans = raw_input("Do you want to change more? [Y/N]")
+    if ans == "Y" or ans == "y":
+        return True
+    else:
+        return False
+
+def TMChangeMenuKey(tmdat):
+    a1 = True
+    while a1:
+        print(tmdat)
+        ans = raw_input("Please enter the TM key: ")
+        if ans in TM:
+            if ans == 'LandType':
+                landtype = LandtypeGetMenu()
+                if landtype == 'abort':
+                    if AreYouSureQuit():
+                        a1 = False
+                else:
+                    str1 = "Changed LandType from "
+                    str1 += tmdat['LandType']
+                    str1 += " to "
+                    str1 += landtype
+                    print(str1)                    
+                    tmdat['Landtype']=landtype
+                    if not ChangeMore():
+                        a1 = False
+                    
+            elif ans == 'Name':
+                name = NamegetMenu()
+                str1 = "Changed Name from "
+                str1 += tmdat['Name']
+                str1 += " to "
+                str1 += name
+                print(str1)
+                tmdat['Name'] = name
+                if not ChangeMore():
+                    a1 = False
+            elif ans == 'Type' or ans == 'ThreshType':
+                ttype = TypeGetMenu()
+                if ttype == 'abort':
+                    if AreYouSureQuit():
+                        a1 = False
+                else:
+                    str1 = "Changed Type from "
+                    str1 += tmdat['Type']
+                    str1 += " to "
+                    str1 += ttype
+                    print(str1)                    
+                    tmdat['Type'] = ttype
+                    tmdat['ThreshType'] = ttype
+                    if not ChangeMore():
+                        a1 = False
+            elif ans == 'Fractal':
+                fractal = FractalMenu()
+                if fractal and not tmdat['Fractal']:
+                    tmdat['Fractal'] = True
+                    a2 = True
+                    while a2:
+                        print("Adding Fractal values...")
+                        fractaldict = FractalMenu2()
+                        if 'abort' in fractaldict:
+                            if AreYouSureQuit():
+                                a1 = False
+                                a2 = False
+                        else:
+                            for fdkey in fractaldict:
+                                str1 = "Adding fractal key "
+                                str1 += fdkey
+                                str1 += " with value "
+                                str1 += str(fractaldict[fdkey])
+                                print(str1)
+                                tmdat[fdkey] = fractaldict[fdkey]
+                            a2 = False
+                            if not ChangeMore():
+                                a1 = False
+                elif fractal and tmdat['Fractal']:
+                    ('Fractal value remains true.  No change.")
+                else:
+                    tmdat['Fractal'] = False                
+        else:
+            print("Invalid entry.")
+            if DoYouWantToQuit():
+                a1 = False    
+
+def TMChangeMenuIndex(TM=TM):
+    a1 = True
+    while a1:
+        if len(TM) == 0:
+            print("Nothing to change in TM since it is empty!")
+            break
+        ans = raw_input("Please enter the index value: ")
+        try:
+            ans = int(ans)
+            if 0<= ans <= len(TM)-1:
+                print("Loading TM change menu for...", TM[ans])
+                tmdict = TM[ans]
+                a1 = False
+            else:
+                print("Invalid entry.")
+                if DoYouWantToQuit():
+                    a1 = False
+        except:
+            print("Invalid entry.")
+            if DoYouWantToQuit():
+                a1 = False
+
+def TMChangeMenu(TM=TM):
+    ans=True
+    while ans:
+        print ("""
+        1.List Threshold Modules by Index
+        2.Change a TM (by index).
+        3.Go back to previous Menu.
+        """)
+        if ans == "1":
+            for i,t in enumerate(TM):
+                print("Index:")
+                print(i)
+                print("TM: ")
+                print(t)
+        elif ans == "2":
+            TMChangeMenuIndex()
 
 def TMMenu(TM=TM):
     ans=True
