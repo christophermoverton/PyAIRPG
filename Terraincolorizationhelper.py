@@ -842,13 +842,59 @@ def TMInputMenu(Colors=Colors, TM = TM, maxindex = maxindex):
                         a2 = False
         if not a1:
             break            
-        
+        tmdat["id"] = maxindex[0]
         print("""You entered """, tmdat)
         ans = raw_input("Is this correct? (Y/N)")
         if ans == "Y" or ans == "y":
             rtmdat = tmdat.copy()
+            incrementMaxIndex()
             a1 = False
+            
     return rtmdat
+
+def DeleteTM(TM=TM):
+    a1 = True
+    while a1:
+        if len(TM) == 0:
+            print("Nothing to delete in TM since it is empty!")
+            break
+        ans = raw_input("Please enter the index value: ")
+        try:
+            ans = int(ans)
+            if 0<= ans <= len(TM)-1:
+                print("Deleting...", TM[ans])
+                del TM[ans]
+                a1 = False
+            else:
+                print("Invalid entry.")
+                if DoYouWantToQuit():
+                    a1 = False
+        except:
+            print("Invalid entry.")
+            if DoYouWantToQuit():
+                a1 = False
+
+def DeleteTMMenu(TM=TM):
+    ans=True
+    while ans:
+        print ("""
+        1.List Threshold Modules by Index
+        2.Delete a TM (by Index).
+        3.Go back to previous Menu.
+        """)
+        ans=raw_input("What would you like to do? ") 
+        if ans=="1":
+            for i,t in enumerate(TM):
+                print("Index:")
+                print(i)
+                print("TM: ")
+                print(t)
+        elif ans =="2":
+            DeleteTM()
+        elif ans =="3":
+            ans = False
+        elif ans !="":
+          print("\n Not Valid Choice Try again")            
 
 def TMMenu(TM=TM):
     ans=True
@@ -882,8 +928,7 @@ def TMMenu(TM=TM):
                 print("TM Data input received and added.")
 ##            print("""TM name: """, tmname, """ added.""")
         elif ans=="5":
-            ##tmname = DeleteTMMenu()
-            print("""Deleted: nothing yet""")
+            DeleteTMMenu()
         elif ans=="6":
 ##            tmname = TMChangeMenu()
             print("Nothing changed.")
