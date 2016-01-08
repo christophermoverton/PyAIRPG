@@ -980,7 +980,9 @@ def TMChangeMenuKey(tmdat):
     while a1:
         print(tmdat)
         ans = raw_input("Please enter the TM key: ")
-        if ans in TM:
+        print(ans)
+        ans = ans.strip()
+        if ans in tmdat:
             if ans == 'LandType':
                 landtype = LandtypeGetMenu()
                 if landtype == 'abort':
@@ -1124,16 +1126,17 @@ def TMChangeMenuKey(tmdat):
                     col.append([tmcolorsdict[tmckey],tmckey])
                 print("Updating colors...")
                 tmdat['Colors'] = col
-                else:
-                    print("Invalid entry.")
-                    if DoYouWantToQuit():
-                        a1 = False    
+        else:
+            print("Invalid entry.")
+            if DoYouWantToQuit():
+                a1 = False    
 
 def TMChangeMenuIndex(TM=TM):
     a1 = True
     while a1:
         if len(TM) == 0:
             print("Nothing to change in TM since it is empty!")
+            a1 = False
             break
         ans = raw_input("Please enter the index value: ")
         try:
@@ -1141,6 +1144,8 @@ def TMChangeMenuIndex(TM=TM):
             if 0<= ans <= len(TM)-1:
                 print("Loading TM change menu for...", TM[ans])
                 tmdict = TM[ans]
+                TMChangeMenuKey(tmdict)
+                TM[ans] = tmdict
                 a1 = False
             else:
                 print("Invalid entry.")
@@ -1159,6 +1164,7 @@ def TMChangeMenu(TM=TM):
         2.Change a TM (by index).
         3.Go back to previous Menu.
         """)
+        ans=raw_input("What would you like to do? ") 
         if ans == "1":
             for i,t in enumerate(TM):
                 print("Index:")
@@ -1167,6 +1173,10 @@ def TMChangeMenu(TM=TM):
                 print(t)
         elif ans == "2":
             TMChangeMenuIndex()
+        elif ans == "3":
+            ans = False
+        elif ans !="":
+          print("\n Not Valid Choice Try again")        
 
 def TMMenu(TM=TM):
     ans=True
@@ -1186,8 +1196,9 @@ def TMMenu(TM=TM):
         elif ans=="2":
             namelist = []
             for key in TM:
-                val = [key,TM[key]['Name']]
+                val = key['Name']
                 namelist.append(val)
+            print(namelist)
             
         elif ans=="3":
             print("There are ",len(TM)," TMs")
@@ -1202,8 +1213,8 @@ def TMMenu(TM=TM):
         elif ans=="5":
             DeleteTMMenu()
         elif ans=="6":
-##            tmname = TMChangeMenu()
-            print("Nothing changed.")
+            TMChangeMenu()
+            ##print("Nothing changed.")
         elif ans=="7":
           print("\n Going back to the main menu!")
           ans = False
