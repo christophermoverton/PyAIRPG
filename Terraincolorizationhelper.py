@@ -904,6 +904,77 @@ def ChangeMore():
     else:
         return False
 
+def InputValue(bounds,typ, name):
+    a,b,c = bounds
+    a1 = True
+    ri = None
+    str1 = "Please enter a value for "
+    str1 += name
+    str1 += "[a "
+    str1 += typ
+    str1 += " from "
+    str1 += str(a)+" to "+str(b) + ". default is set at " + str(c)
+    str1 += "]: "
+    while a1:
+        ans = raw_input(str1)
+        try:
+            if typ == 'float':
+                ans = float(ans)
+            elif typ == 'int':
+                ans = int(ans)
+            if a <= ans <= b:
+                ri = ans
+            else:
+                print("Invalid input.")
+                if DoYouWantToQuit():
+                    a1 = False
+        except:
+            print("Invalid input.")
+            if DoYouWantToQuit():
+                a1 = False
+    return ri
+
+def getTBMenu(tmdat,one = True):
+    a2 = True
+    twost = "2"
+    while a2:
+        str1 = "First TBracket"
+        if not one:
+            str1 += twost
+        str1 += " entry position this should be a lower value relative a "
+        str1 += "second entry: "
+        print (str1)
+        tbrackpos1 = GetTBpositionMenu()
+        if tbrackpos1 == None:
+            print("No entry.")
+            if DoYouWantToQuit():
+                break
+        else:
+            str1 = "Second TBracket"
+            if not one:
+                str1 += twost
+            str1 += " entry position this be greater than the first: "
+            print(str1)
+            tbrackpos2 = GetTBpositionMenu()
+            if tbrackpos2 == None:
+                print("No 2nd entry.")
+                if DoYouWantToQuit():
+                    break
+            else:
+                if tbrackpos1 > tbrackpos2:
+                    print("2nd entry greater than the first.")
+                    print("We'll swap these.")
+                    tbrackpos2a = tbrackpos1
+                    tbrackpos1 = tbrackpos2
+                    tbrackpos2 = tbrackpos2a
+                if one:
+                    print ("Updating TBracket")
+                    tmdat['TBracket'] = [tbrackpos1,tbrackpos2]
+                else:
+                    print ("Updating TBracket2")
+                    tmdat['TBracket2'] = [tbrackpos1,tbrackpos2]
+                a2 = False
+
 def TMChangeMenuKey(tmdat):
     a1 = True
     while a1:
@@ -941,7 +1012,7 @@ def TMChangeMenuKey(tmdat):
                     if AreYouSureQuit():
                         a1 = False
                 else:
-                    str1 = "Changed Type from "
+                    str1 = "Changed Type and ThreshType from "
                     str1 += tmdat['Type']
                     str1 += " to "
                     str1 += ttype
@@ -974,13 +1045,89 @@ def TMChangeMenuKey(tmdat):
                             if not ChangeMore():
                                 a1 = False
                 elif fractal and tmdat['Fractal']:
-                    ('Fractal value remains true.  No change.")
+                    ('Fractal value remains true.  No change.')
                 else:
-                    tmdat['Fractal'] = False                
-        else:
-            print("Invalid entry.")
-            if DoYouWantToQuit():
-                a1 = False    
+                    tmdat['Fractal'] = False
+            elif ans == 'nsize':
+                bounds = (.01, 10000, 20.0)
+                typ = "float"
+                fname = "nsize"
+                rv = InputValue(bounds,typ, fname)
+                str1 = "Changed " + fname+ " from " + str(tmdat['nsize'])
+                str1 += " to " + str(rv)
+                print(str1)
+                tmdat['nsize'] = rv
+                if not ChangeMore():
+                    a1 = False
+            elif ans == 'nbasis':
+                bounds = (0, 1, 0)
+                typ = "int"
+                fname = "nbasis"
+                rv = InputValue(bounds,typ, fname)
+                str1 = "Changed " + fname+ " from " + str(tmdat['nbasis'])
+                str1 += " to " + str(rv)
+                print(str1)
+                tmdat['nbasis'] = rv
+                if not ChangeMore():
+                    a1 = False
+            elif ans == 'lacunarity':
+                bounds = (0.01, 6.0, 2.0)
+                typ = "float"
+                fname = "lacunarity"
+                rv = InputValue(bounds,typ, fname)
+                str1 = "Changed " + fname+ " from " + str(tmdat['lacunarity'])
+                str1 += " to " + str(rv)
+                print(str1)
+                tmdat['lacunarity'] = rv
+                if not ChangeMore():
+                    a1 = False
+            elif ans == 'depth':
+                bounds = (1.0, 16.0, 6.0)
+                typ = "float"
+                fname = "depth"
+                rv = InputValue(bounds,typ, fname)
+                str1 = "Changed " + fname+ " from " + str(tmdat['depth'])
+                str1 += " to " + str(rv)
+                print(str1)
+                tmdat['depth'] = rv
+                if not ChangeMore():
+                    a1 = False 
+            elif ans == 'dimension':
+                bounds = (0, 1, 0)
+                typ = "float"
+                fname = "dimension"
+                rv = InputValue(bounds,typ, fname)
+                str1 = "Changed " + fname+ " from " + str(tmdat['dimension'])
+                str1 += " to " + str(rv)
+                print(str1)
+                tmdat['dimension'] = rv
+                if not ChangeMore():
+                    a1 = False
+            elif ans == 'TBracket':
+                getTBMenu(tmdat)
+                if not ChangeMore():
+                    a1 = False
+            elif ans == 'TBracket2':
+                getTBMenu(tmdat,one = False)
+                if not ChangeMore():
+                    a1 = False
+            elif ans == 'Colors':
+                tmcolorsdict = {}
+                for color in tmdat['Colors']:
+                    c, cpos = color
+                    tmcolorsdict[cpos] = c
+                TMColorsMenu(tmcolorsdict)
+                col=[]
+                tmckeys = list(tmcolorsdict.keys())
+                tmckeys.sort()
+                for tmckey in tmckeys:
+                    col.append([tmcolorsdict[tmckey],tmckey])
+                print("Updating colors...")
+                tmdat['Colors'] = col
+                else:
+                    print("Invalid entry.")
+                    if DoYouWantToQuit():
+                        a1 = False    
 
 def TMChangeMenuIndex(TM=TM):
     a1 = True
