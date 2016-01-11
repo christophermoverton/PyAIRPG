@@ -1,7 +1,8 @@
 Colors = {}
 TM = []
 DCI = {}
-DCI_LTYPE = {}
+DCI_LTYPE = {'Flood':[], 'Land':[], 'Mount':[]}
+DCI_NAMEIDS = {}
 MM = {}
 NCs = {}
 maxindex = [1]
@@ -1221,8 +1222,291 @@ def TMMenu(TM=TM):
         elif ans !="":
           print("\n Not Valid Choice Try again")
           
-print('Welcome to the Terrain colorization assistant!')
-print("Let's go ahead and add some terrain colors!")
+
+def addLandTypeEntries(sindex, DCI_LTYPE = DCI_LTYPE):
+    returnval = None
+    a1 = True
+    while a1:
+        print("This is DCI_LTYPE (LandType) assistance.")
+        ans = raw_input("How many LandTypes do you want to change this color to? (int)")
+        try:
+            ans = int(ans)
+            if 1 <= ans <= 3:
+                nlist = ["first", "second", "third"]
+                landtypes = []
+                for i in range(ans):
+                    str1 = "Enter the " + nlist[i] " LandType."
+                    print(str1)
+                    landtype = LandtypeGetMenu()
+                    if landtype == 'abort':
+                        print("No LandType selected.")
+                    else:
+                        landtypes.append(landtype)
+                if len(landtypes)== 0:
+                    print("No LandTypes entered exiting DCI_LTYPE assistance...")
+                    break
+                matchedsel = []
+##                for ltsel in landtypes:
+                for lt in DCI_LTYPE:
+                    if sindex in DCI_LTYPE[lt]:
+                        if lt in landtypes:
+                            matchedsel.append(ltsel)
+                            str1 = ltsel + " input LandType already exists"
+                            str1 += "for the selected DCI key index."
+                            str1 += "No changes being made for this."
+                for ltsel in landtypes:
+                    if not ltsel in matchedsel:
+                        DCI_LTYPE[ltsel].append(sindex)
+                        str1 = "Added DCI selection key " + sindex
+                        str1 += " for LandType " + ltsel + "in the DCI_LTYPE."
+                        print(str1)
+                a1 = False
+            else:
+                print("You entered a number too small or too large.  Your entry should be between 1 and 3.")
+                if DoYouWantToQuit():
+                    a1 = False
+        except:
+            print("Unable to process request.")
+            if DoYouWantToQuit():
+                a1 = False
+
+def DCIInputMenu(DCI=DCI, DCI_NAMEIDS=DCI_NAMEIDS, DCI_LTYPE=DCI_LTYPE,
+                 Colors=Colors, maxindex = maxindex):
+    a1 = True
+    while a1:
+        print ("""
+        DCI Color Input Menu:
+        1.Add existing color from Colors Dictionary
+        2.Show colors from Colors Dictionary
+        3.Input manually an RGB color value
+        4.Show DCI data (in dictionary form)
+        5.Abort/Done (go to previous DCI color menu)
+        """)
+        ans=raw_input("What would you like to do? ")
+        if ans == "1":
+            colorname = getColorNameMenu(DCI)
+            if colorname != "":
+                addLandTypeEntries(maxindex)
+                DCI[maxindex] = Colors[colorname]
+                str1 = "You've added a new key: "
+                str1 += maxindex + " and color "
+                str1 += colorname
+                print(str1)
+                DCI_NAMEIDS[maxindex] = colorname
+                str1 = "DCI ID: "
+                str1 += str(maxindex)
+                str1 += " has been assigned with the name "
+                str1 += colorname
+                print(str1)
+                incrementMaxIndex()
+            else:
+                print("Not able to add color entry.")
+        elif ans == "2":
+            print(Colors)
+        elif ans == "3":
+            print("A Color Name needs to be added for this entry.")
+            colorname = NamegetMenu()
+            colorval = getColorValue(DCI)
+            if colorval[0] == None:
+                print("Not able to add color entry.")
+            else:
+                landtype = LandtypeGetMenu()
+                if landtype == 'abort':
+                    print("Not able to add color entry.")
+                else:
+                    str1 = "DCI Land type chosen "
+                    str1 += landtype
+                    print(str1)                    
+                    DCI_LTYPE[landtype].append(maxindex)
+                    DCI[maxindex] = colorval
+                    str1 = "You've added a new key: "
+                    str1 += maxindex + " and color "
+                    str1 += colorname
+                    print(str1)
+                    DCI_NAMEIDS[maxindex] = colorname
+                    str1 = "DCI ID: "
+                    str1 += str(maxindex)
+                    str1 += " has been assigned with the name "
+                    str1 += colorname
+                    print(str1)
+                    incrementMaxIndex()
+        elif ans == "4":
+            print(DCI)
+            print(DCI_LTYPE)
+            print(DCI_NAMEIDS)
+        elif ans == "5":
+            print("Leaving DCI Input menu.")
+            a1 = False
+
+def DeleteDCI(DCI=DCI, DCI_LTYPE, DCI_NAMEIDS):
+    a1 = True
+    while a1:
+        if len(DCI) == 0:
+            print("Nothing to delete in DCI since it is empty!")
+            break
+        ans = raw_input("Please enter the index value: ")
+        try:
+            ans = int(ans)
+            if ans in DCI:
+                str1 = "Deleting..."
+                str1 += "index " + str(ans) + " color " + str(DCI[ans])
+                print(str1)
+                del DCI[ans]
+                for lt in DCI_LTYPE:
+                    if ans in DCI_LTYPE[lt]:
+                        DCI_LTYPE[lt].remove(ans)
+                del DCI_NAMEIDS[ans]
+                a1 = False
+            else:
+                print("Invalid entry.")
+                if DoYouWantToQuit():
+                    a1 = False
+        except:
+            print("Invalid entry.")
+            if DoYouWantToQuit():
+                a1 = False
+
+def DeleteDCIMenu(DCI=DCI):
+    ans=True
+    while ans:
+        print ("""
+        1.List DCI by Index
+        2.Delete a DCI (by Index).
+        3.Go back to previous Menu.
+        """)
+        ans=raw_input("What would you like to do? ") 
+        if ans=="1":
+            for key in DCI:
+                print("DCI Key:")
+                print(key)
+                print("DCI Value: ")
+                print(DCI[key])
+        elif ans =="2":
+            DeleteDCI()
+        elif ans =="3":
+            ans = False
+        elif ans !="":
+          print("\n Not Valid Choice Try again")
+
+        
+def getDCIColor(DCI=DCI):
+    print("DCI color change using existing Colors value.")
+    print(DCI)
+    ans = raw_input("Enter the DCI color index: ")
+    try:
+        ans = int(ans)
+        if ans in DCI:
+            ans2 = raw_input("Do you want to change the LandType entry(-ies)? [Y/N]")
+            if ans2 == "Y" or ans2 == "y":
+                addLandTypeEntries(ans)
+
+            colorname = getColorNameMenu(DCI)
+            if colorname != "":
+                str1 = "For the existing DCI key: "
+                str1 += ans + " you've changed the color from "
+                str1 += DCI_NAMEIDS[ans] + " to " + colorname
+                print(str1)
+                DCI[ans] = Colors[colorname]
+                DCI_NAMEIDS[ans] = colorname
+                if not ChangeMore():
+                    a1 = False
+    except:
+        print("Invalid entry")
+        if DoYouWantToQuit():
+            a1 = False
+
+def getDCIColorRGBin(DCI=DCI):
+    print("DCI color change using existing Colors value.")
+    print(DCI)
+    ans = raw_input("Enter the DCI color index: ")
+    try:
+        ans = int(ans)
+        if ans in DCI:
+            ans2 = raw_input("Do you want to change the LandType entry(-ies)? [Y/N]")
+            if ans2 == "Y" or ans2 == "y":
+                addLandTypeEntries(ans)
+
+            print("A Color Name needs to be added for this entry.")
+            colorname = NamegetMenu()
+            print("A Color Value needs to be added for this entry.")
+            colorval = getColorValue(DCI)
+            if colorval[0] == None:
+                print("Not able to add color entry.")
+                if DoYouWantToQuit():
+                    a1 = False
+            else:
+                str1 = "For the existing DCI key: "
+                str1 += ans + " you've changed the color from "
+                str1 += DCI_NAMEIDS[ans] + " to " + colorname
+                print(str1)
+                DCI[ans] = Colors[colorname]
+                str1 = "You've changed the color value from "
+                str1 = str(DCI[ans]) + " to " + str(colorval)
+                print(str1)
+                DCI_NAMEIDS[ans] = colorname
+                DCI[ans] = colorval
+                if not ChangeMore():
+                    a1 = False
+    except:
+        print("Invalid entry")
+        if DoYouWantToQuit():
+            a1 = False
+
+def DCIChangeMenu(DCI=DCI, Colors=Colors, maxindex = maxindex):
+    a1 = True
+    while a1:
+        print ("""
+        DCI Color Change Menu:
+        1.Change existing color using Colors Dictionary
+        2.Show colors from Colors Dictionary
+        3.Change existing color inputting manually an RGB color value
+        4.Show DCI data (in dictionary form)
+        5.Abort/Done (go to previous DCI color menu)
+        """)
+        ans=raw_input("What would you like to do? ")
+        if ans == "1":
+            getDCIColor()
+        elif ans == "2":
+            print(Colors)
+        elif ans == "3":
+            getDCIColorRGBin()
+        elif ans == "4":
+            print(DCI)
+            print(DCI_LTYPE)
+            print(DCI_NAMEIDS)
+        elif ans == "5":
+            print("Leaving DCI Change menu.")
+            a1 = False
+
+def DirectColorInputMenu(DCI = DCI):
+    ans=True
+    while ans:
+        print ("""
+        1.List DCI dictionary
+        2.How many DCIs are there?
+        3.Input a DCI
+        4.Delete a DCI.
+        5.Change a DCI.
+        6.Go to Main Menu
+        """)
+        ans=raw_input("What would you like to do? ") 
+        if ans=="1":
+            print(DCI)
+        elif ans=="2":
+            str1 = "There are "
+            str1 += str(len(DCI))
+            str1 += " colors in the DCI."
+            print(str1)
+        elif ans=="3":
+            DCIInputMenu()
+        elif ans=="4":
+            DeleteDCIMenu()
+        elif ans=="5":
+            DCIChangeMenu()
+        elif ans=="6":
+            ans = False
+        elif ans !="":
+            print("\n Not Valid Choice Try again")
 def MainMenu():
     ans=True
     while ans:
@@ -1255,4 +1539,7 @@ def MainMenu():
             ans = False
         elif ans !="":
             print("\n Not Valid Choice Try again")
+
+print('Welcome to the Terrain colorization assistant!')
+print("Let's go ahead and add some terrain colors!")
 MainMenu()
