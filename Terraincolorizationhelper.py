@@ -976,14 +976,14 @@ def getTBMenu(tmdat,one = True):
                     tmdat['TBracket2'] = [tbrackpos1,tbrackpos2]
                 a2 = False
 
-def TMChangeMenuKey(tmdat):
+def MMChangeMenuKey(MM=MM):
     a1 = True
     while a1:
-        print(tmdat)
-        ans = raw_input("Please enter the TM key: ")
+        print(MM)
+        ans = raw_input("Please enter the MM key: ")
         print(ans)
         ans = ans.strip()
-        if ans in tmdat:
+        if ans in MM:
             if ans == 'LandType':
                 landtype = LandtypeGetMenu()
                 if landtype == 'abort':
@@ -1009,19 +1009,19 @@ def TMChangeMenuKey(tmdat):
                 tmdat['Name'] = name
                 if not ChangeMore():
                     a1 = False
-            elif ans == 'Type' or ans == 'ThreshType':
+            elif ans == 'Type':
                 ttype = TypeGetMenu()
                 if ttype == 'abort':
                     if AreYouSureQuit():
                         a1 = False
                 else:
-                    str1 = "Changed Type and ThreshType from "
+                    str1 = "Changed Type from"
                     str1 += tmdat['Type']
                     str1 += " to "
                     str1 += ttype
                     print(str1)                    
                     tmdat['Type'] = ttype
-                    tmdat['ThreshType'] = ttype
+##                    tmdat['ThreshType'] = ttype
                     if not ChangeMore():
                         a1 = False
             elif ans == 'Fractal':
@@ -1286,15 +1286,15 @@ def DCIInputMenu(DCI=DCI, DCI_NAMEIDS=DCI_NAMEIDS, DCI_LTYPE=DCI_LTYPE,
         if ans == "1":
             colorname = getColorNameMenu(DCI)
             if colorname != "":
-                addLandTypeEntries(maxindex)
-                DCI[maxindex] = Colors[colorname]
+                addLandTypeEntries(maxindex[0])
+                DCI[maxindex[0]] = Colors[colorname]
                 str1 = "You've added a new key: "
                 str1 += maxindex + " and color "
                 str1 += colorname
                 print(str1)
-                DCI_NAMEIDS[maxindex] = colorname
+                DCI_NAMEIDS[maxindex[0]] = colorname
                 str1 = "DCI ID: "
-                str1 += str(maxindex)
+                str1 += str(maxindex[0])
                 str1 += " has been assigned with the name "
                 str1 += colorname
                 print(str1)
@@ -1317,15 +1317,15 @@ def DCIInputMenu(DCI=DCI, DCI_NAMEIDS=DCI_NAMEIDS, DCI_LTYPE=DCI_LTYPE,
                     str1 = "DCI Land type chosen "
                     str1 += landtype
                     print(str1)                    
-                    DCI_LTYPE[landtype].append(maxindex)
-                    DCI[maxindex] = colorval
+                    DCI_LTYPE[landtype].append(maxindex[0])
+                    DCI[maxindex[0]] = colorval
                     str1 = "You've added a new key: "
-                    str1 += maxindex + " and color "
+                    str1 += str(maxindex[0]) + " and color "
                     str1 += colorname
                     print(str1)
-                    DCI_NAMEIDS[maxindex] = colorname
+                    DCI_NAMEIDS[maxindex[0]] = colorname
                     str1 = "DCI ID: "
-                    str1 += str(maxindex)
+                    str1 += str(maxindex[0])
                     str1 += " has been assigned with the name "
                     str1 += colorname
                     print(str1)
@@ -1507,6 +1507,237 @@ def DirectColorInputMenu(DCI = DCI):
             ans = False
         elif ans !="":
             print("\n Not Valid Choice Try again")
+
+def MMTypeGetMenu():
+    ans=True
+    ttype = 'abort'
+    while ans:
+        print ("""
+        Choose the following Mixing Module Type:
+        1.Normal (Color Interpolation)
+        2.Normal2 (Color Interpolation 2)
+        3.Multiply
+        4.Screen
+        5.Overlay
+        6.Hard light
+        7.Soft light
+        8.Vivid light
+        9.Dodge
+        10.Burn
+        11.Difference
+        12.Divide
+        13.Darkenonly
+        14.Lightenonly
+        15.None (quit)
+        """)    
+        ans=raw_input("What Threshold Type? ") 
+        if ans=="1": 
+            ans = False
+            ttype = 'normal'
+        elif ans=="2":
+            ans = False
+            ttype = 'normal2'
+        elif ans=="3":
+            ans = False
+            ttype = 'multiply'
+        elif ans=="4":
+            ans = False
+            ttype = 'screen'
+        elif ans=="5":
+            ans = False
+            ttype = 'overlay'
+        elif ans=="6":
+            ans = False
+            ttype = 'hardlight'
+        elif ans=="7":
+            ans = False
+            ttype = 'softlight'
+        elif ans=="8":
+            ans = False
+            ttype = 'vividlight'
+        elif ans=="9":
+            ans = False
+            ttype = 'dodge'
+        elif ans=="10":
+            ans = False
+            ttype = 'burn'
+        elif ans=="11":
+            ans = False
+            ttype = 'difference'
+        elif ans=="12":
+            ans = False
+            ttype = 'divide'
+        elif ans=="13":
+            ans = False
+            ttype = 'darkenonly'
+        elif ans=="14":
+            ans = False
+            ttype = 'lightenonly'
+        elif ans=="15":
+            ans = False
+            ttype = 'abort'
+        elif ans !="":
+            print("\n Not Valid Choice Try again")
+    return ttype
+
+def getMMInsMenu(MM=MM,DCI=DCI,TM=TM, DCI_NAMEIDS=DCI_NAMEIDS):
+    ans=True
+    while ans:
+        print("MM Ins input menu."
+        print ("""
+        1.List MM (Mixer Module) dictionary
+        2.List DCI dictionary
+        3.List TMs.
+        4.Input Ins (by key).
+        5.Tip on getting MM inputs setup properly.
+        6.Go to Main Menu
+        """)
+        ans=raw_input("What would you like to do? ")
+        if ans=="1":
+              print(MM)
+        elif ans == "2":
+              print(DCI_NAMEIDS)
+        elif ans == "3":
+              print(TM)
+        elif ans == "4":
+              
+        elif ans == "5":
+              str1 = "You should have generally have TMs and DCIs setup /n"
+              str1 += "before inputting a new MM.  MMs are structured around /n"
+              str1 += "colors having been provisioned either through  /n"
+              str1 += "computation of a TM or through a DCI.  /n"
+              str1 += "If a Color input key doesn't have a TM, DCI, or MM ID /n"
+              str1 += " key associated, then  a key input will not work."
+              print(str1)
+
+def MMInputMenu(MM = MM, maxindex = maxindex):
+    a1 = True
+    mmdat = {}
+    rtmdat = {}
+    while a1:
+        mmindex = maxindex[0]
+        name = NamegetMenu()
+        mmdat['Name'] = name
+        a2 = True
+        while a2:
+            landtype = LandtypeGetMenu()
+            if landtype == 'abort':
+                if AreYouSureQuit():
+                    a2 = False
+                    a1 = False
+                    break
+            else:
+                mmdat['Landtype']=landtype
+                a2 = False
+                    
+        if not a1:
+            break
+        a2 = True
+        while a2:
+            mtype = MMTypeGetMenu()
+            if mtype == 'abort':
+                if AreYouSureQuit():
+                    a2 = False
+                    a1 = False
+                    break
+            else:
+                mmdat['Type'] = mtype
+                a2 = False
+                    
+        if not a1:
+            break
+        
+
+        if not a1:
+            break
+        tmcolorsdict = {}
+        TMColorsMenu(tmcolorsdict)
+        col=[]
+        tmckeys = list(tmcolorsdict.keys())
+        tmckeys.sort()
+        for tmckey in tmckeys:
+            col.append([tmcolorsdict[tmckey],tmckey])
+        tmdat['Colors'] = col
+        a2 = True
+        while a2:
+            print ("First TBracket entry position this should be a lower value relative a second entry.")
+            tbrackpos1 = GetTBpositionMenu()
+            if tbrackpos1 == None:
+                print("No entry.")
+                if DoYouWantToQuit():
+                    a1 = False
+                    break
+            else:
+                print("Second TBracket entry position this should be > first.")
+                tbrackpos2 = GetTBpositionMenu()
+                if tbrackpos2 == None:
+                    print("No 2nd entry.")
+                    if DoYouWantToQuit():
+                        a1 = False
+                        break
+                else:
+                    if tbrackpos1 > tbrackpos2:
+                        print("2nd entry greater than the first.")
+                        print("We'll swap these.")
+                        tbrackpos2a = tbrackpos1
+                        tbrackpos1 = tbrackpos2
+                        tbrackpos2 = tbrackpos2a
+                    tmdat['TBracket'] = [tbrackpos1,tbrackpos2]
+                    a2 = False
+        if not a1:
+            break
+        if ttype == 'heightT':
+            a2 = True
+            while a2:
+                print ("First TBracket2 entry position this should be a lower value relative a second entry.")
+                tbrackpos3 = GetTBpositionMenu()
+                if tbrackpos3 == None:
+                    print("No entry.")
+                    if DoYouWantToQuit():
+                        a1 = False
+                        break
+                else:
+                    print("Second TBracket2 entry position this should be > first.")
+                    tbrackpos4 = GetTBpositionMenu()
+                    if tbrackpos4 == None:
+                        print("No 2nd entry.")
+                        if DoYouWantToQuit():
+                            a1 = False
+                            break
+                    else:
+                        if tbrackpos3 > tbrackpos4:
+                            print("2nd entry greater than the first.")
+                            print("We'll swap these.")
+                            tbrackpos4a = tbrackpos3
+                            tbrackpos3 = tbrackpos4
+                            tbrackpos4 = tbrackpos4a
+                        tmdat['TBracket2'] = [tbrackpos3,tbrackpos4]
+                        a2 = False
+        if not a1:
+            break            
+        tmdat["id"] = maxindex[0]
+        print("""You entered """, tmdat)
+        ans = raw_input("Is this correct? (Y/N)")
+        if ans == "Y" or ans == "y":
+            rtmdat = tmdat.copy()
+            incrementMaxIndex()
+            a1 = False
+            
+    return rtmdat
+
+def MixerModuleMenu(DCI = DCI):
+    ans=True
+    while ans:
+        print ("""
+        1.List MM (Mixer Module) dictionary
+        2.How many MMs are there?
+        3.Input a MM (Mixer Module).
+        4.Delete a MM.
+        5.Change a MM.
+        6.Go to Main Menu
+        """)
+        ans=raw_input("What would you like to do? ") 
+
 def MainMenu():
     ans=True
     while ans:
