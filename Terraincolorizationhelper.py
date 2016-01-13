@@ -979,14 +979,14 @@ def getTBMenu(tmdat,one = True):
                     tmdat['TBracket2'] = [tbrackpos1,tbrackpos2]
                 a2 = False
 
-def MMChangeMenuKey(MM=MM):
+def TMChangeMenuKey(tmdat):
     a1 = True
     while a1:
-        print(MM)
-        ans = raw_input("Please enter the MM key: ")
+        print(tmdat)
+        ans = raw_input("Please enter the TM key: ")
         print(ans)
         ans = ans.strip()
-        if ans in MM:
+        if ans in tmdat:
             if ans == 'LandType':
                 landtype = LandtypeGetMenu()
                 if landtype == 'abort':
@@ -2006,6 +2006,114 @@ def MMDeleteMenu(MM=MM):
             print("Invalid entry.  Needs to be an integer")
             if DoYouWantToQuit():
                 break
+
+def MMChangeMenuKey(mmdat):
+    a1 = True
+    while a1:
+        print(mmdat)
+        ans = raw_input("Please enter the TM key: ")
+        print(ans)
+        ans = ans.strip()
+        if ans in MM:
+            if ans == 'LandType':
+                landtype = LandtypeGetMenu()
+                if landtype == 'abort':
+                    if AreYouSureQuit():
+                        a1 = False
+                else:
+                    str1 = "Changed LandType from "
+                    str1 += mmdat['LandType']
+                    str1 += " to "
+                    str1 += landtype
+                    print(str1)                    
+                    mmdat['Landtype']=landtype
+                    if not ChangeMore():
+                        a1 = False
+                    
+            elif ans == 'Name':
+                name = NamegetMenu()
+                str1 = "Changed Name from "
+                str1 += mmdat['Name']
+                str1 += " to "
+                str1 += name
+                print(str1)
+                mmdat['Name'] = name
+                if not ChangeMore():
+                    a1 = False
+            elif ans == 'Type':
+                ttype = TypeGetMenu()
+                if ttype == 'abort':
+                    if AreYouSureQuit():
+                        a1 = False
+                else:
+                    str1 = "Changed Type from"
+                    str1 += mmdat['Type']
+                    str1 += " to "
+                    str1 += ttype
+                    print(str1)                    
+                    mmdat['Type'] = ttype
+##                    tmdat['ThreshType'] = ttype
+                    if not ChangeMore():
+                        a1 = False
+
+
+
+            elif ans == 'TBracket':
+                getTBMenu(mmdat)
+                if not ChangeMore():
+                    a1 = False
+
+        else:
+            print("Invalid entry.")
+            if DoYouWantToQuit():
+                a1 = False    
+
+def MMChangeMenuIndex(MM=MM):
+    a1 = True
+    while a1:
+        if len(MM) == 0:
+            print("Nothing to change in MM since it is empty!")
+            a1 = False
+            break
+        ans = raw_input("Please enter the index value: ")
+        try:
+            ans = int(ans)
+            if ans in MM:
+                print("Loading MM change menu for...", MM[ans])
+                mmdict = MM[ans]
+                MMChangeMenuKey(mmdict)
+                MM[ans] = mmdict
+                a1 = False
+            else:
+                print("Invalid entry.")
+                if DoYouWantToQuit():
+                    a1 = False
+        except:
+            print("Invalid entry.")
+            if DoYouWantToQuit():
+                a1 = False
+
+def MMChangeMenu(MM=MM):
+    ans=True
+    while ans:
+        print ("""
+        1.List Mixing Modules by Index
+        2.Change a MM (by index).
+        3.Go back to previous Menu.
+        """)
+        ans=raw_input("What would you like to do? ") 
+        if ans == "1":
+            for i,t in enumerate(MM):
+                print("Index:")
+                print(i)
+                print("MM: ")
+                print(t)
+        elif ans == "2":
+            MMChangeMenuIndex()
+        elif ans == "3":
+            ans = False
+        elif ans !="":
+          print("\n Not Valid Choice Try again")  
 
 def MixerModuleMenu(MM = MM):
     ans=True
