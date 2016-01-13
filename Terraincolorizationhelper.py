@@ -6,6 +6,9 @@ DCI_NAMEIDS = {}
 MM = {}
 NCs = {}
 maxindex = [1]
+cflist = [.05,.1,.2,.3,.4,.5,.6,.7,1.0,-1.0]
+flood = .1
+mount = .9
 
 def DoYouWantToKeep():
     keep = False
@@ -1235,7 +1238,7 @@ def addLandTypeEntries(sindex, DCI_LTYPE = DCI_LTYPE):
                 nlist = ["first", "second", "third"]
                 landtypes = []
                 for i in range(ans):
-                    str1 = "Enter the " + nlist[i] " LandType."
+                    str1 = "Enter the " + nlist[i] +" LandType."
                     print(str1)
                     landtype = LandtypeGetMenu()
                     if landtype == 'abort':
@@ -1580,11 +1583,76 @@ def MMTypeGetMenu():
             print("\n Not Valid Choice Try again")
     return ttype
 
+def getMMInval(MM=MM, DCI=DCI, TM=TM):
+    a1=True
+    rval = None
+    while a1:
+        ans = raw_input("""
+        MM In key?
+        """)
+        try:
+            ans = int(ans)
+            c1 = ans in MM
+            c2 = ans in DCI
+            tmidlist = []
+            for tm in TM:
+                tmidlist.append(tm['id'])
+            c3 = ans in tmidlist
+            if c1 or c2 or c3:
+                rval = ans
+                a1 = False
+            else:
+                print("Unable to find a matching (existing) key.")
+                if DoYouWantToQuit():
+                    a1 = False
+        except:
+            print("Invalid entry.  This must be a integer.")
+            if DoYouWantToQuit():
+                a1 = False
+    return rval
+
+def getMMInvals():
+    ans = True
+    rvals = (None,None)
+    while ans:
+        print("Enter first In key: ")
+        r1 = getMMInval()
+        if r1 != None:
+            ans2 = True
+            while ans2:
+                r2 = getMMInval()
+                if r2 != None:
+                    str1 = "You entered (" + str(r1) +","+str(r2)+")"
+                    str1 += "as In key values."
+                    print(str1)
+                    ans = raw_input("Is this correct? (Y/N)")
+                    if ans == "Y" or ans == "y":
+                        rvals = (r1,r2)
+                        ans = False
+                        break
+                    else:
+                        if DoYouWantToQuit():
+                            ans = False
+                            break
+                        break
+                else:
+                    print("2nd Input key incorrectly.")
+                    if DoYouWantToQuit():
+                        ans = False
+                        break
+        else:
+            print("First In key entered incorrectly.")
+            if DoYouWantToQuit():
+                break
+    return rvals
+        
+
 def getMMInsMenu(MM=MM,DCI=DCI,TM=TM, DCI_NAMEIDS=DCI_NAMEIDS):
     ans=True
+    rvals = (None,None)
     while ans:
-        print("MM Ins input menu."
-        print ("""
+        print("MM Ins input menu.")
+        print("""
         1.List MM (Mixer Module) dictionary
         2.List DCI dictionary
         3.List TMs.
@@ -1600,7 +1668,8 @@ def getMMInsMenu(MM=MM,DCI=DCI,TM=TM, DCI_NAMEIDS=DCI_NAMEIDS):
         elif ans == "3":
               print(TM)
         elif ans == "4":
-              
+              rvals = getMMInvals()
+              ans = False
         elif ans == "5":
               str1 = "You should have generally have TMs and DCIs setup /n"
               str1 += "before inputting a new MM.  MMs are structured around /n"
@@ -1609,6 +1678,146 @@ def getMMInsMenu(MM=MM,DCI=DCI,TM=TM, DCI_NAMEIDS=DCI_NAMEIDS):
               str1 += "If a Color input key doesn't have a TM, DCI, or MM ID /n"
               str1 += " key associated, then  a key input will not work."
               print(str1)
+        elif ans == "6":
+              ans = False
+    return rvals
+
+def MMFactorVarGetMenu(ftype):
+    ans=True
+    ttype = None
+    while ans:
+        if ftype == 'variable':
+            print ("""
+            Choose the following MM FactorVar Type:
+            1.Height
+            2.Normal (gradient/slope)
+            3.Height2 (Feathering on Land to other Landtype smoothing).
+            4.None (quit)
+            """)    
+            ans=raw_input("What FactorVar Type? ") 
+            if ans=="1": 
+                ans = False
+                ttype = 'height'
+            elif ans=="2":
+                ans = False
+                ttype = 'normal'
+            elif ans=="3":
+                ttype = 'height2'
+            elif ans=="4":
+                ans = False
+                ttype = 'abort'
+            elif ans !="":
+                print("\n Not Valid Choice Try again")
+        elif ftype == 'falloff':
+            print ("""
+            Choose the following MM FactorVar Type:
+            1.Height Threshold (Height falloff feather smoothing).
+            2.Normal Threshold (Grad Slope falloff feather smoothing).
+            3.None (quit)
+            """)    
+            ans=raw_input("What FactorVar Type? ") 
+            if ans=="1": 
+                ans = False
+                ttype = 'heightT'
+            elif ans=="2":
+                ans = False
+                ttype = 'normalT'
+            elif ans=="3":
+                ans = False
+                ttype = 'abort'
+            elif ans !="":
+                print("\n Not Valid Choice Try again")
+
+    return ttype
+
+def MMgetFalloff(cflist=cflist):
+    a1 = True
+    rvals = (None,None)
+    print("""
+    Tip for setting falloff boundaries.  The cflist boundary key that you
+    have chosen will set the threshold boundary distance measure from
+    the lowest threshold boundary position for the first boundary key chosen,
+    or the highest threshold boundary position for the second boundary measure.
+    No falloff (feathering) for such boundary position can be set by choosing
+    the value -1.0 .  Example:  You want to feather all positions on the
+    lower boundary of the given MM threshold to positions that are at distance
+    less than .1 from the threshold edge, but you don't want any feathering
+    on the upper threshold boundary (remember: a threshold always has two edge
+    boundary positions which is a lower and upper boundary).
+    So the first value entered is .1 and the second is -1.
+    """)
+    while ans:
+        print("Please enter a cubic function key value as shown or -1.0.")
+        print(cflist)
+        ans=raw_input("Enter first falloff boundary: ")
+        try:
+            ans = float(ans)
+            if ans in cflist:
+                a2 = True
+                while a2:
+                    print("Please enter a second boundary cubic function key or -1.0.")
+                    print(cflist)
+                    ans2 = raw_input("Enter the second falloff boundary: ")
+                    try:
+                        ans2 = float(ans)
+                        if ans2 in cflist:
+                            str1 = "You entered falloff boundaries of "
+                            str1 += str(ans) + " and " + str(ans2)
+                            print(str1)
+                            ans3 = raw_input("Is this correct? (Y/N)")
+                            if ans3 == "Y" or ans3 == "y":
+                                rvals = (r1,r2)
+                            else:
+                                if DoYouWantToQuit():
+                                    a1 = False
+                                    break
+                        else:
+                            print("Invalid entry.  Entry not found in cflist.")
+                            if DoYouWantToQuit():
+                                a1 = False
+                                break
+                    except:
+                        print("Invalid entry.  This needs to be a float.")
+                         if DoYouWantToQuit():
+                            a1 = False
+                            break
+            else:
+                print("Entered value is not in the cflist.")
+                if DoYouWantToQuit():
+                    a1 = False
+                    break
+        except:
+            print("Invalid entry.  This needs to be a float.")
+            if DoYouWantToQuit():
+                ans = False
+                break
+
+def MMFactorTypeGetMenu():
+    ans=True
+    while ans:
+        print ("""
+        Choose the following MM FactorType:
+        1.Fixed
+        2.Variable
+        3.Falloff.
+        4.None (quit)
+        """)    
+        ans=raw_input("What FactorType? ") 
+        if ans=="1": 
+            ans = False
+            ttype = 'fixed'
+        elif ans=="2":
+            ans = False
+            ttype = 'variable'
+        elif ans=="3":
+            ans = False
+            ttype = 'falloff'
+        elif ans=="4":
+            ans = False
+            ttype = 'abort'
+        elif ans !="":
+            print("\n Not Valid Choice Try again")
+    return ttype
 
 def MMInputMenu(MM = MM, maxindex = maxindex):
     a1 = True
@@ -1646,19 +1855,71 @@ def MMInputMenu(MM = MM, maxindex = maxindex):
                     
         if not a1:
             break
-        
-
+        a2 = False
+        while a2:
+            rvals = getMMInsMenu()
+            if rvals[0] != None:
+                  mmdat['Ins'] = rvals
+            else:
+              print("To quit MM input...")
+              if DoYouWantToQuit():
+                a1 = False
+                break              
         if not a1:
             break
-        tmcolorsdict = {}
-        TMColorsMenu(tmcolorsdict)
-        col=[]
-        tmckeys = list(tmcolorsdict.keys())
-        tmckeys.sort()
-        for tmckey in tmckeys:
-            col.append([tmcolorsdict[tmckey],tmckey])
-        tmdat['Colors'] = col
+        a2 = False
+        while a2:
+            ftype = MMFactorTypeGetMenu()
+            if ftype == 'abort':
+                print("No valid FactorType inputed...")
+                if DoYouWantToQuit():
+                    a1 = False
+                    break
+            else:
+                mmdat['FactorType'] = ftype
+                a2 = False
+        if not a1:
+            break
         a2 = True
+        if ftype != 'fixed':
+            while a2:
+                  fvtype = MMFactorVarGetMenu()
+                  if fvtype == 'abort':
+                      print("No Valid FactorVar type entered...")
+                      if DoYouWantToQuit():
+                        a1 = False
+                        break
+                  else:
+                      mmdat['FactorVar'] = fvtype
+                      a2 = False
+        if not a1:
+            break
+        a2 = True
+        if ftype == 'falloff':
+            while a2:
+                rfvals = MMgetFalloff()
+                if rfvals[0] == None:
+                    print("Needed falloff values have not been entered.")
+                    if DoYouWantToQuit():
+                        a1 = False
+                        break
+                else:
+                    mmdat['Falloff'] = rfvals
+                    break
+        if not a1:
+            break
+        if ftype == 'fixed':
+            bounds = (0.0,1.0,.5)
+            tp = 'float'
+            name = 'Factor'
+            factorval = InputValue(bounds,tp, name)
+            if factorval == None:
+                print("A needed factor value has not be entered.")
+                if DoYouWantToQuit():
+                    a1 = False
+                    break                
+        while a2:
+            
         while a2:
             print ("First TBracket entry position this should be a lower value relative a second entry.")
             tbrackpos1 = GetTBpositionMenu()
