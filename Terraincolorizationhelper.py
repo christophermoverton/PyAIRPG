@@ -1766,7 +1766,7 @@ def MMgetFalloff(cflist=cflist):
                             print(str1)
                             ans3 = raw_input("Is this correct? (Y/N)")
                             if ans3 == "Y" or ans3 == "y":
-                                rvals = (r1,r2)
+                                rvals = (ans,ans2)
                             else:
                                 if DoYouWantToQuit():
                                     a1 = False
@@ -1778,7 +1778,7 @@ def MMgetFalloff(cflist=cflist):
                                 break
                     except:
                         print("Invalid entry.  This needs to be a float.")
-                         if DoYouWantToQuit():
+                        if DoYouWantToQuit():
                             a1 = False
                             break
             else:
@@ -1818,6 +1818,20 @@ def MMFactorTypeGetMenu():
         elif ans !="":
             print("\n Not Valid Choice Try again")
     return ttype
+
+def MMMainOutMenu():
+    print("Main Out Menu")
+    print("""
+          This puts the MM color out to the main out of the CIOM.
+          It is advised only doing this for the end of a given
+          node chain or at the beginning of a node chain, but not
+          going to the Main Out on intermediate Node chain Mixing Modules.
+          """)
+    ans = raw_input("MainOut?  [Y/N]")
+    if ans == "Y" or ans == "y":
+        return True
+    else:
+        return False
 
 def MMInputMenu(MM = MM, maxindex = maxindex):
     a1 = True
@@ -1909,84 +1923,91 @@ def MMInputMenu(MM = MM, maxindex = maxindex):
         if not a1:
             break
         if ftype == 'fixed':
-            bounds = (0.0,1.0,.5)
-            tp = 'float'
-            name = 'Factor'
-            factorval = InputValue(bounds,tp, name)
-            if factorval == None:
-                print("A needed factor value has not be entered.")
-                if DoYouWantToQuit():
-                    a1 = False
-                    break                
-        while a2:
-            
-        while a2:
-            print ("First TBracket entry position this should be a lower value relative a second entry.")
-            tbrackpos1 = GetTBpositionMenu()
-            if tbrackpos1 == None:
-                print("No entry.")
-                if DoYouWantToQuit():
-                    a1 = False
-                    break
-            else:
-                print("Second TBracket entry position this should be > first.")
-                tbrackpos2 = GetTBpositionMenu()
-                if tbrackpos2 == None:
-                    print("No 2nd entry.")
+            while a2:
+                bounds = (0.0,1.0,.5)
+                tp = 'float'
+                name = 'Factor'
+                factorval = InputValue(bounds,tp, name)
+                if factorval == None:
+                    print("A needed factor value has not be entered.")
                     if DoYouWantToQuit():
                         a1 = False
                         break
                 else:
-                    if tbrackpos1 > tbrackpos2:
-                        print("2nd entry greater than the first.")
-                        print("We'll swap these.")
-                        tbrackpos2a = tbrackpos1
-                        tbrackpos1 = tbrackpos2
-                        tbrackpos2 = tbrackpos2a
-                    tmdat['TBracket'] = [tbrackpos1,tbrackpos2]
-                    a2 = False
-        if not a1:
-            break
-        if ttype == 'heightT':
-            a2 = True
+                    mmdat['Factor'] = factorval
+                    break
+        
+        if ftype == 'falloff':
             while a2:
-                print ("First TBracket2 entry position this should be a lower value relative a second entry.")
-                tbrackpos3 = GetTBpositionMenu()
-                if tbrackpos3 == None:
+                print ("First TBracket entry position this should be a lower value relative a second entry.")
+                tbrackpos1 = GetTBpositionMenu()
+                if tbrackpos1 == None:
                     print("No entry.")
                     if DoYouWantToQuit():
                         a1 = False
                         break
                 else:
-                    print("Second TBracket2 entry position this should be > first.")
-                    tbrackpos4 = GetTBpositionMenu()
-                    if tbrackpos4 == None:
+                    print("Second TBracket entry position this should be > first.")
+                    tbrackpos2 = GetTBpositionMenu()
+                    if tbrackpos2 == None:
                         print("No 2nd entry.")
                         if DoYouWantToQuit():
                             a1 = False
                             break
                     else:
-                        if tbrackpos3 > tbrackpos4:
+                        if tbrackpos1 > tbrackpos2:
                             print("2nd entry greater than the first.")
                             print("We'll swap these.")
-                            tbrackpos4a = tbrackpos3
-                            tbrackpos3 = tbrackpos4
-                            tbrackpos4 = tbrackpos4a
-                        tmdat['TBracket2'] = [tbrackpos3,tbrackpos4]
+                            tbrackpos2a = tbrackpos1
+                            tbrackpos1 = tbrackpos2
+                            tbrackpos2 = tbrackpos2a
+                        mmdat['TBracket'] = [tbrackpos1,tbrackpos2]
                         a2 = False
         if not a1:
-            break            
-        tmdat["id"] = maxindex[0]
-        print("""You entered """, tmdat)
+            break         
+        mmdat["id"] = maxindex[0]
+        mmdat['Outs'] = maxindex[0]
+        if MMMainOutMenu():
+            mmdat['MainOut'] = True
+        else:
+            mmdat['MainOut'] = False
+        print("""You entered """, mmdat)
         ans = raw_input("Is this correct? (Y/N)")
         if ans == "Y" or ans == "y":
-            rtmdat = tmdat.copy()
+            MM[maxindex[0]] = mmdat.copy()
             incrementMaxIndex()
             a1 = False
-            
-    return rtmdat
+            print("Successfully added MM module...")
 
-def MixerModuleMenu(DCI = DCI):
+def MMDeleteMenu(MM=MM):
+    ans = True
+    while ans:
+        print("""
+        Enter the MM key to delete.
+        """)
+        ans = raw_input("Which key to delete? ")
+        try:
+            ans = int(ans)
+            if ans in MM:
+                str1 = "Deleting " + str(MM[ans])
+                print(str1)
+                yans = raw_input("Is this correct? (Y/N)")
+                if yans == "Y" or yans == "y":
+                    del MM[ans]
+                    break
+                else:
+                    if DoYouWantToQuit():
+                        break
+            else:
+                print("Key not found in MM dictionary.")
+                if DoYouWantToQuit():
+                    break
+        except:
+            print("Invalid entry.  Needs to be an integer")
+            if DoYouWantToQuit():
+                break
+
+def MixerModuleMenu(MM = MM):
     ans=True
     while ans:
         print ("""
@@ -1997,7 +2018,16 @@ def MixerModuleMenu(DCI = DCI):
         5.Change a MM.
         6.Go to Main Menu
         """)
-        ans=raw_input("What would you like to do? ") 
+        ans=raw_input("What would you like to do? ")
+        if ans == "1":
+            print(MM)
+        elif ans == "2":
+            print(len(MM))
+        elif ans == "3":
+            MMInputMenu()
+        elif ans == "4":
+            MMDeleteMenu()
+        elif ans == "5":
 
 def MainMenu():
     ans=True
