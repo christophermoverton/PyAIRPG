@@ -1341,7 +1341,7 @@ def DCIInputMenu(DCI=DCI, DCI_NAMEIDS=DCI_NAMEIDS, DCI_LTYPE=DCI_LTYPE,
             print("Leaving DCI Input menu.")
             a1 = False
 
-def DeleteDCI(DCI=DCI, DCI_LTYPE, DCI_NAMEIDS):
+def DeleteDCI(DCI=DCI, DCI_LTYPE=DCI_LTYPE, DCI_NAMEIDS=DCI_NAMEIDS):
     a1 = True
     while a1:
         if len(DCI) == 0:
@@ -1480,6 +1480,8 @@ def DCIChangeMenu(DCI=DCI, Colors=Colors, maxindex = maxindex):
         elif ans == "5":
             print("Leaving DCI Change menu.")
             a1 = False
+        elif ans !="":
+            print("\n Not Valid Choice Try again")
 
 def DirectColorInputMenu(DCI = DCI):
     ans=True
@@ -2041,7 +2043,7 @@ def MMChangeMenuKey(mmdat):
                 if not ChangeMore():
                     a1 = False
             elif ans == 'Type':
-                ttype = TypeGetMenu()
+                ttype = MMTypeGetMenu()
                 if ttype == 'abort':
                     if AreYouSureQuit():
                         a1 = False
@@ -2056,7 +2058,81 @@ def MMChangeMenuKey(mmdat):
                     if not ChangeMore():
                         a1 = False
 
-
+            elif ans == 'FactorType':
+                if ftype == 'abort':
+                    print("No valid FactorType inputed...")
+                    if DoYouWantToQuit():
+                        a1 = False
+                        break
+                else:
+                    mmdat['FactorType'] = ftype
+                    if ftype == 'fixed':
+                        a2 = True
+                        while a2:
+                            bounds = (0.0,1.0,.5)
+                            tp = 'float'
+                            name = 'Factor'
+                            factorval = InputValue(bounds,tp, name)
+                            if factorval == None:
+                                print("A needed factor value has not be entered.")
+                                if DoYouWantToQuit():
+                                    a1 = False
+                                    break
+                            else:
+                                mmdat['Factor'] = factorval
+                                break
+                    elif ftype == 'falloff':
+                        a2 = True
+                        while a2:
+                            rfvals = MMgetFalloff()
+                            if rfvals[0] == None:
+                                print("Needed falloff values have not been entered.")
+                                if DoYouWantToQuit():
+                                    a1 = False
+                                    break
+                            else:
+                                mmdat['Falloff'] = rfvals
+                                break
+                        while a2:
+                            print ("First TBracket entry position this should be a lower value relative a second entry.")
+                            tbrackpos1 = GetTBpositionMenu()
+                            if tbrackpos1 == None:
+                                print("No entry.")
+                                if DoYouWantToQuit():
+                                    a1 = False
+                                    break
+                            else:
+                                print("Second TBracket entry position this should be > first.")
+                                tbrackpos2 = GetTBpositionMenu()
+                                if tbrackpos2 == None:
+                                    print("No 2nd entry.")
+                                    if DoYouWantToQuit():
+                                        a1 = False
+                                        break
+                                else:
+                                    if tbrackpos1 > tbrackpos2:
+                                        print("2nd entry greater than the first.")
+                                        print("We'll swap these.")
+                                        tbrackpos2a = tbrackpos1
+                                        tbrackpos1 = tbrackpos2
+                                        tbrackpos2 = tbrackpos2a
+                                    mmdat['TBracket'] = [tbrackpos1,tbrackpos2]
+                                    a2 = False
+                            
+                    if ftype != 'fixed':
+                        a2 = True
+                        while a2:
+                              fvtype = MMFactorVarGetMenu()
+                              if fvtype == 'abort':
+                                  print("No Valid FactorVar type entered...")
+                                  if DoYouWantToQuit():
+                                    a1 = False
+                                    break
+                              else:
+                                  mmdat['FactorVar'] = fvtype
+                                  break
+                    if not ChangeMore():
+                        a1 = False                
 
             elif ans == 'TBracket':
                 getTBMenu(mmdat)
@@ -2136,6 +2212,11 @@ def MixerModuleMenu(MM = MM):
         elif ans == "4":
             MMDeleteMenu()
         elif ans == "5":
+            MMChangeMenu()
+        elif ans == "6":
+            ans = False
+        elif ans !="":
+            print("\n Not Valid Choice Try again")        
 
 def MainMenu():
     ans=True
@@ -2158,10 +2239,9 @@ def MainMenu():
             TMMenu()
     ##      print("\n Student Deleted") 
         elif ans=="3":
-            print("not there yet.")
+            DirectColorInputMenu()
         elif ans=="4":
-    ##      print("\n Goodbye")
-            print("not there yet.")
+            MixerModuleMenu()
         elif ans=="5":
             print("not there yet.")
         elif ans=="7":
