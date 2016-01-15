@@ -1600,7 +1600,8 @@ def getMMInval(MM=MM, DCI=DCI, TM=TM):
             for tm in TM:
                 tmidlist.append(tm['id'])
             c3 = ans in tmidlist
-            if c1 or c2 or c3:
+            c4 = ans == 0
+            if c1 or c2 or c3 or c4:
                 rval = ans
                 a1 = False
             else:
@@ -2228,7 +2229,8 @@ def MainMenu():
         4.Add/Modify Mixer Modules dictionary
         5.Add/Modify Node Chains dictionary
         6.Set Flood/Mount stage
-        7.Exit/Quit
+        7.Tip for setting up Terrain Colorization
+        8.Exit/Quit
         """)
         ans=raw_input("What would you like to do? ") 
         if ans=="1": 
@@ -2245,6 +2247,79 @@ def MainMenu():
         elif ans=="5":
             print("not there yet.")
         elif ans=="7":
+            print("""
+            The CIOM (Color Input Output Module) is responsible for a terrain
+            pixels determined output 8 bit per channel RGB assignment.
+            In a given interface, Node Chains are usually established primarily
+            by Colors either having been set by Threshold Modules or
+            directly inputted into the CIOM via DCI s.  Thus when working with
+            Mixer Modules, it is likely the most sensisble to have TMs
+            or DCIs firstly established before moving onto structuring
+            Mixer Modules, and/or working with Node Chains themselves.
+            A Node Chain menu wizard aids in auto detecting TMs and/or
+            DCIs in structuring the basis of any Node Chains, though
+            the development of these chains will be specified via the user
+            given likely chains of Mixer Modules as desired.
+            What differentiates a Mixer Module from a Threshold Module (TM)?
+            A Threshold Module is a standalone non CIOM input color mixing
+            system that provides a Color RGB output.
+            TMs are like MMs in that users
+            specify color inputs that will form the basis of any mixing
+            of such color (whether given from fractal noising or any
+            height or normal map threshold basis...that is with specified
+            height ranges to color pixels or given by normal colorization values
+            and so forth.  Colors assigned in the TM are not done via DCIs or
+            through the CIOM but instead provided natively in the definition of
+            the TM.  On the other hand, Mixer modules rely on
+            Color inputs being provided through CIOM valid id channels.
+            This is 'id' on the TM or the key value provided from the DCI,
+            but otherwise, Mixer modules do not have any color specified input
+            systems (native to the MM)
+            and thus are always reliant upon some channel id specified
+            input.  TMs and DCIs serve as the root of any node chain system.
+            While MMs are secondary in the node chaining process.
+            MMs can specify other MMs channel outs as inputs, but also
+            TM ids or DCI ids, but themselves again are not standalones in
+            in start of a node chain system since they cannot produce color
+            firstly without input color from the CIOM.  Again TMs and DCIs
+            can do this.
+               Node Chains serve from TMs or DCIs firstly and then
+            likely move to a sequence of chained MMs which culminate in a
+            final MM output.  This chain output is likely read as the last
+            injected MainOut written color value in the CIOM.
+            Node chains can verify upon conditions specified through the
+            basis of TMs set for any relevant heightmap position.
+            Thus, if for instance, a land type pixel qualifies for
+            normal Threshold Module, and also qualifies for inter land type
+            feather mixing all relevant node chains set for these independent
+            TMs will apply in the formation of such pixels color value
+            in computing its mixing.  Another good way of thinking of TMs
+            is that aside from mixing, they serve as the basis of testing
+            conditions to see that a heightmap position qualifies for
+            'feathering' or qualifies for normal 'rock' color texturing even
+            before computing its given color value for all these specifications
+            and then mixing them together to form a color output.
+               In setting up a Mixer Module, valid inputs will be cross
+            checked before an input Mixer Module is added.  Thus it is highly
+            recommended sequentially setting up a pre sketched out design layout
+            in order from one MM chained to the next MM.  Though a user
+            can rearrange these MM channels later as desired in changing their
+            input channels as necessary.
+            Thus order of operations are likely as follows:
+            1.  Establish a Colors dictionary.  This includes a likely
+            range of mixing colors to be used.
+            2.  Setup desired Threshold Modules for all landtypes.
+            3.  Setup DCIs (if any) where Thresholding is only reserved
+            to a given Landtype (i.e, you don't want to set up a TM to
+            apply color mixing).
+            4.  Setup MMs from TMs and DCIs, and then setup additional
+            MMs from these MMs repeating iteratively this procedure
+            going from one MM to the next until completing a desired chain.
+            5. Run the Node Chain wizard in setting up the chains...this
+            should be straightfoward since the brunt of work has already
+            been done.  
+            """)
+        elif ans=="8":
             print("\n Goodbye")
             ans = False
         elif ans !="":
