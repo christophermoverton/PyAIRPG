@@ -1284,12 +1284,14 @@ def setMixColor(MM,CIOM,mID,h, nz, hmax=hmax, NORM=NORM, normdiff=normdiff,
                     gval1 = 1
 ##                    print('z', z)
                else:
-                    gval1 = getCubicY(cf[CFK1],rncdiff1)
+                    cfval = MM[mID]['Falloff'][0]
+                    gval1 = getCubicY(cf[cfval],rncdiff1)
 ##                    print(gval1)
                if rncdiff2 > MM[mID]['Falloff'][1]:
                     gval2 = 1
                else:
-                    gval2 = getCubicY(cf[CFK1],rncdiff2)
+                    cfval = MM[mID]['Falloff'][1]
+                    gval2 = getCubicY(cf[cfval],rncdiff2)
                gval = min(gval1,gval2)
 ##               gval = 1-gval
           elif MM[mID]['FactorVar'] == 'heightT':
@@ -1307,11 +1309,13 @@ def setMixColor(MM,CIOM,mID,h, nz, hmax=hmax, NORM=NORM, normdiff=normdiff,
                if rncdiff1 > MM[mID]['Falloff'][0]:
                     gval1 = 1
                else:
-                    gval1 = getCubicY(cf[CFK2],rncdiff1)
+                    cfval = MM[mID]['Falloff'][0]
+                    gval1 = getCubicY(cf[cfval],rncdiff1)
                if rncdiff2 > MM[mID]['Falloff'][1]:
                     gval2 = 1
                else:
-                    gval2 = getCubicY(cf[CFK2],rncdiff2)
+                    cfval = MM[mID]['Falloff'][1]
+                    gval2 = getCubicY(cf[cfval],rncdiff2)
                gval = min(gval1,gval2)
                gval = 1-gval
      elif MM[mID]['FactorType'] == 'fixed':
@@ -1412,10 +1416,40 @@ for j in range(dimY):
 ##            newcolor2 = lerpcolor(waterlow,waterhigh,dw)
 ##            newcolor = lerpcolor(newcolor,newcolor2,.5)
         elif (h>mount):
-            newcolor=lerpcolor(mountlow,mounthigh,(h-mount)/(hmax-mount))
-            addLandmaposition((i,j),landmap,landmaprev)
-            newcolor2 = lerpcolor(mountlow,mounthigh,(z-minnormz)/(normdiff))
-            newcolor = lerpcolor(newcolor,newcolor2,.5)                
+##            newcolor=lerpcolor(mountlow,mounthigh,(h-mount)/(hmax-mount))
+##            addLandmaposition((i,j),landmap,landmaprev)
+##            newcolor2 = lerpcolor(mountlow,mounthigh,(z-minnormz)/(normdiff))
+##            newcolor = lerpcolor(newcolor,newcolor2,.5)
+             for thr in tm_mount:
+                  t1 = 0
+                  t2 = 0
+                  thrshs = [t1,t2]
+                  if checktm(tm_mount[thr], h, z, thrshs):
+                       ##thrshs = [t1,t2]
+                       ## assign to ColorInOut
+                       CIOM[thr] = getThColor(tm_mount[thr], h, z,
+                                              ijorigin, thrshs)
+                       ##print('saved CIOM')
+             ## Load DCI from DCI_LTYPE into CIOM
+             for dci in DCI_LTYPE['Mount']:
+                  CIOM[dci] = DCI[dci]
+             ## next check CIOM for NCs (Node chains) these will be aded to MD
+             for ci in CIOM:
+                  if ci in NCs:
+                       if NCs[ci]['Dependencies'][0] != -1:
+                            for dep in NCs[ci]['Dependencies']:
+                                 if dep in MD_Dependencies:
+                                      MD += NCs[ci]['Chain']
+                                      MD_Dependencies.append(ci)
+                       else:
+                            MD+= NCs[ci]['Chain']
+                            MD_Dependencies.append(ci)
+             ## next iterate MD for mixing
+
+             for mix in MD:
+                  setMixColor(MM,CIOM,mix,h, z)
+             ##outid = getLastColorOut(MD, MM)
+             newcolor = CIOM[0]
         else:
              for thr in tm_land:
                   t1 = 0

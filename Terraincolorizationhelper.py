@@ -1,3 +1,6 @@
+import shelve
+filename = "/home/strangequark/colorizeterrain.db"
+CTDAT = shelve.open(filename)
 Colors = {}
 TM = []
 DCI = {}
@@ -9,6 +12,182 @@ maxindex = [1]
 cflist = [.05,.1,.2,.3,.4,.5,.6,.7,1.0,-1.0]
 flood = .1
 mount = .9
+fm = (flood,mount)
+fmdiff = abs(flood - mount)
+maxindex_s1 = [29]
+Colors_s1 = {'Sand1':(252,252,220),'Sand2':(245,244,223), 'Sand3':(222,221,197),
+             'Grass1':(205,237,173),'Grass2':(194,227,161),
+             'Grass3':(174,207,140), 'Dirt':(247,235,178),'Dirt2':(232,221,172),
+             'Dirt3':(209,200,157), 'Rock1':(245,242,230),'Rock2':(214,213,206),
+             'Rock3':(181,178,167), 'Snow1':(250,249,247),'Snow2':(242,240,230),
+             'Snow3':(232,232,232), 'Water1':(13,186,146),'Water2':(12,168,116),
+             'Water3':(5,163,100), 'Iron1':(245,175,24), 'Iron2':(219,157,22),
+             'Terracotta':(221,169,121), 'Sandstone':(242,237,218),
+             'Charcoal':(147,145,146), 'Clay':(213,195,157),
+             'OliveClay':(197,200,191), 'DesertSand':(221,190,146)}
+TM_s1 = [{'Landtype':'Land', 'Type': 'height',
+          'TBracket':[flood,flood+fmdiff/4.0], 'Fractal': True,
+        'Colors':[[Colors_s1['Sand1'],0],[Colors_s1['Sand2'],.5],
+                  [Colors_s1['Sand3'],1.0]], 'Name': 'LLDFractal',
+        'nsize': 100.0, 'nbasis': 3, 'lacunarity':2.1,
+        'depth':16, 'dimension':1.0, 'id': 1, 'ThreshType': 'height'},
+        {'Landtype':'Land', 'Type': 'height',
+         'TBracket':[flood,flood+fmdiff/4.0], 'Fractal': False,
+        'Colors':[[Colors_s1['Sand1'],0],[Colors_s1['Sand2'],.5],
+                  [Colors_s1['Sand3'],1.0]], 'Name': 'LLDFractal',
+        'nsize': 100.0, 'nbasis': 3, 'lacunarity':2.1,
+        'depth':16, 'dimension':1.0, 'id': 2, 'ThreshType': 'height'},
+        {'Landtype':'Land', 'Type': 'height',
+          'TBracket':[flood,flood+fmdiff/4.0], 'Fractal': True,
+        'Colors':[[Colors_s1['Sand1'],0],[Colors_s1['Sand2'],.5],
+                  [Colors_s1['Sand3'],1.0]], 'Name': 'LLDFractal',
+        'TBracket2': [-float('inf'),.2],
+        'Cutoff':[float('inf'),flood+fmdiff/4.0],
+        'nsize': 100.0, 'nbasis': 3, 'lacunarity':2.1,
+        'depth':16, 'dimension':1.0, 'id': 11, 'ThreshType': 'heightT'},
+        {'Landtype':'Land', 'Type': 'height',
+          'TBracket':[flood,flood+fmdiff/4.0], 'Fractal': False,
+        'Colors':[[Colors_s1['Sand1'],0],[Colors_s1['Sand2'],.5],
+                  [Colors_s1['Sand3'],1.0]], 'Name': 'LLDFractal',
+        'TBracket2': [-float('inf'),.2],
+        'Cutoff':[float('inf'),flood+fmdiff/4.0],
+        'nsize': 100.0, 'nbasis': 3, 'lacunarity':2.1,
+        'depth':16, 'dimension':1.0, 'id': 12, 'ThreshType': 'heightT'},
+        {'Landtype':'Land', 'Type': 'height',
+         'TBracket':[flood+fmdiff/4.0,mount], 'Fractal': True,
+        'Colors':[[Colors_s1['Dirt'],0],[Colors_s1['Dirt2'],.2],
+                  [Colors_s1['Dirt3'],.4], [Colors_s1['Grass1'],.6],
+                  [Colors_s1['Grass2'],.8], [Colors_s1['Grass3'],1.0]],
+         'Name': 'LHDFractal',
+        'nsize': 100.0, 'nbasis': 0, 'lacunarity':2.0,
+        'depth':16, 'dimension':1.1, 'id': 3, 'ThreshType': 'height'},
+        {'Landtype':'Land', 'Type': 'height',
+         'TBracket':[flood+fmdiff/4.0,mount], 'Fractal': False,
+        'Colors':[[Colors_s1['Dirt'],0],[Colors_s1['Dirt2'],.2],
+                  [Colors_s1['Dirt3'],.4], [Colors_s1['Grass1'],.6],
+                  [Colors_s1['Grass2'],.8], [Colors_s1['Grass3'],1.0]],
+         'Name': 'LHDFractal',
+        'nsize': 100.0, 'nbasis': 0, 'lacunarity':2.0,
+        'depth':16, 'dimension':1.1, 'id': 4, 'ThreshType': 'height'},
+        {'Landtype':'Land', 'Type': 'normal', 'TBracket':[.1,1], 'Fractal': True,
+        'Colors':[[Colors_s1['Iron2'],0],[Colors_s1['Rock2'],.5],
+                  [Colors_s1['Rock3'],1.0]], 'Name': 'LLRFractal',
+        'nsize': 40.0, 'nbasis': 3, 'lacunarity':2.1,
+        'depth':16, 'dimension':1.1, 'id': 5, 'ThreshType': 'normal'},
+        {'Landtype':'Land', 'Type': 'normal', 'TBracket':[.1,1], 'Fractal': True,
+        'Colors':[[Colors_s1['Iron1'],0],[Colors_s1['Rock2'],.5],
+                  [Colors_s1['Rock1'],1.0]], 'Name': 'LLHFractal',
+        'nsize': 40.0, 'nbasis': 3, 'lacunarity':2.1,
+        'depth':16, 'dimension':1.1, 'id': 6, 'ThreshType': 'normal'},
+        {'Landtype':'Flood', 'Type': 'height', 'TBracket':[0,flood],
+         'Fractal': True,
+        'Colors':[[Colors_s1['Water1'],0],
+                  [Colors_s1['Water2'],.5],[Colors_s1['Water3'],1]],
+         'Name': 'WLFractal',
+        'nsize': 40.0, 'nbasis': 3, 'lacunarity':2.1,
+        'depth':16, 'dimension':1.3, 'id': 7, 'ThreshType': 'height'},
+        {'Landtype':'Flood', 'Type': 'height', 'TBracket':[0,flood],
+         'Fractal': False,
+        'Colors':[[Colors_s1['Water1'],0],
+                  [Colors_s1['Water2'],.5],[Colors_s1['Water3'],1]],
+         'Name': 'WLFractal',
+        'nsize': 40.0, 'nbasis': 3, 'lacunarity':2.1,
+        'depth':16, 'dimension':1.3, 'id': 8, 'ThreshType': 'height'},
+        {'Landtype':'Land', 'Type': 'height', 'TBracket':[0,flood],
+         'Fractal': True, 'TBracket2': [-1,.2],
+        'Colors':[[Colors_s1['Water1'],0],
+                  [Colors_s1['Water2'],.5],[Colors_s1['Water3'],1]],
+         'Name': 'WLFractal',
+        'nsize': 40.0, 'nbasis': 3, 'lacunarity':2.1,
+        'depth':16, 'dimension':1.3, 'id': 13, 'ThreshType': 'heightT'},
+        {'Landtype':'Flood', 'Type': 'height', 'TBracket':[0,flood],
+         'Fractal': False, 'TBracket2': [-1,.2],
+        'Colors':[[Colors_s1['Water1'],0],
+                  [Colors_s1['Water2'],.5],[Colors_s1['Water3'],1]],
+         'Name': 'WLFractal',
+        'nsize': 40.0, 'nbasis': 3, 'lacunarity':2.1,
+        'depth':16, 'dimension':1.3, 'id': 14, 'ThreshType': 'heightT'},
+        {'Landtype':'Mount', 'Type': 'height', 'TBracket':[mount,1.0],
+         'Fractal': True,
+        'Colors':[[Colors_s1['Snow1'],0],
+                  [Colors_s1['Snow2'],.5],[Colors_s1['Snow3'],1]],
+         'Name': 'WLFractal',
+        'nsize': 40.0, 'nbasis': 3, 'lacunarity':2.1,
+        'depth':16, 'dimension':1.3, 'id': 9, 'ThreshType': 'height'},
+        {'Landtype':'Mount', 'Type': 'height', 'TBracket':[mount,1.0],
+         'Fractal': False,
+        'Colors':[[Colors_s1['Snow1'],0],
+                  [Colors_s1['Snow2'],.5],[Colors_s1['Snow3'],1]],
+         'Name': 'WLFractal',
+        'nsize': 40.0, 'nbasis': 3, 'lacunarity':2.1,
+        'depth':16, 'dimension':1.3, 'id': 10, 'ThreshType': 'height'},
+        {'Landtype':'Land', 'Type': 'height', 'TBracket':[mount,1.0],
+         'Fractal': True, 'TBracket2': [.2,-float('inf')],
+        'Colors':[[Colors_s1['Snow1'],0],
+                  [Colors_s1['Snow2'],.5],[Colors_s1['Snow3'],1]],
+         'Name': 'WLFractal',
+        'nsize': 40.0, 'nbasis': 3, 'lacunarity':2.1,
+        'depth':16, 'dimension':1.3, 'id': 15, 'ThreshType': 'heightT'},
+        {'Landtype':'Land', 'Type': 'height', 'TBracket':[mount,1.0],
+         'Fractal': False, 'TBracket2': [.2,-float('inf')],
+        'Colors':[[Colors_s1['Snow1'],0],
+                  [Colors_s1['Snow2'],.5],[Colors_s1['Snow3'],1]],
+         'Name': 'WLFractal',
+        'nsize': 40.0, 'nbasis': 3, 'lacunarity':2.1,
+        'depth':16, 'dimension':1.3, 'id': 16, 'ThreshType': 'heightT'}
+         ]
+MM_s1={17: {'id': 17, 'Landtype': 'Land', 'Ins': (1,2), 'Outs': 17, 'Type':
+          'normal2', 'FactorType' : 'fixed', 'FactorVar': 'height',
+          'Factor':.5, 'Falloff':0, 'MainOut': True},
+       18: {'id': 18, 'Landtype': 'Land', 'Ins': (11,12), 'Outs': 18, 'Type':
+          'normal2', 'FactorType' : 'fixed', 'FactorVar': 'height',
+          'Factor':.5, 'Falloff':0, 'MainOut': False},
+       19: {'id': 19, 'Landtype': 'Land', 'Ins': (3,4), 'Outs': 19, 'Type':
+          'normal2', 'FactorType' : 'fixed', 'FactorVar': 'height',
+          'Factor':.5, 'Falloff':0, 'MainOut': True},
+       20: {'id': 20, 'Landtype': 'Land', 'Ins': (5,6), 'Outs': 20, 'Type':
+          'normal2', 'FactorType' : 'fixed', 'FactorVar': 'height',
+          'Factor':.5, 'Falloff':0, 'MainOut': False},
+       21: {'id': 21, 'Landtype': 'Land', 'Ins': (0,20), 'Outs': 21, 'Type':
+          'normal2', 'FactorType' : 'falloff', 'FactorVar': 'normalT',
+          'TBracket' : [.1,1],
+          'Factor':.5, 'Falloff':[.2,-1], 'MainOut': True},
+       22: {'id': 22, 'Landtype': 'Flood', 'Ins': (7,8), 'Outs': 22, 'Type':
+          'normal2', 'FactorType' : 'fixed', 'FactorVar': 'height',
+          'Factor':.5, 'Falloff':0, 'MainOut': True},
+       23: {'id': 23, 'Landtype': 'Mount', 'Ins': (9,10), 'Outs': 23, 'Type':
+          'normal2', 'FactorType' : 'fixed', 'FactorVar': 'height',
+          'Factor':.5, 'Falloff':0, 'MainOut': True},
+       24: {'id': 24, 'Landtype': 'Land', 'Ins': (13,14), 'Outs': 24, 'Type':
+          'normal2', 'FactorType' : 'fixed', 'FactorVar': 'height',
+          'Factor':.5, 'Falloff':0, 'MainOut': False},
+       25: {'id': 25, 'Landtype': 'Land', 'Ins': (15,16), 'Outs': 25, 'Type':
+          'normal2', 'FactorType' : 'fixed', 'FactorVar': 'height',
+          'Factor':.5, 'Falloff':0, 'MainOut': False},
+       26: {'id': 26, 'Landtype': 'Land', 'Ins': (0,18), 'Outs': 26, 'Type':
+          'normal2', 'FactorType' : 'falloff', 'FactorVar': 'heightT',
+          'TBracket':[flood,flood+fmdiff/4.0],
+          'Factor':.5, 'Falloff':[.2,-1], 'MainOut': True},
+       27: {'id': 27, 'Landtype': 'Land', 'Ins': (0,24), 'Outs': 27, 'Type':
+          'normal2', 'FactorType' : 'falloff', 'FactorVar': 'heightT',
+          'TBracket':[0,flood],
+          'Factor':.5, 'Falloff':[-1,.2], 'MainOut': True},
+       28: {'id': 28, 'Landtype': 'Land', 'Ins': (0,25), 'Outs': 28, 'Type':
+          'normal2', 'FactorType' : 'falloff', 'FactorVar': 'heightT',
+          'TBracket':[mount,1],
+          'Factor':.5, 'Falloff':[.2,-1], 'MainOut': True}
+       }
+
+NCs_s1 = {5:{'Chain':[20,21],'Dependencies':[-1]},
+       1:{'Chain':[17],'Dependencies':[-1]},
+       3:{'Chain':[19],'Dependencies':[-1]},
+       7:{'Chain':[22],'Dependencies':[-1]},
+       9:{'Chain':[23],'Dependencies':[-1]},
+       11:{'Chain':[18,26],'Dependencies':[-1]},
+       13:{'Chain':[24,27],'Dependencies':[-1]},
+##       19:{'Chain':[22],'Dependencies':[-1]}
+       15:{'Chain':[25,28],'Dependencies':[-1]}
+       }
 
 def DoYouWantToKeep():
     keep = False
@@ -2217,7 +2396,152 @@ def MixerModuleMenu(MM = MM):
         elif ans == "6":
             ans = False
         elif ans !="":
-            print("\n Not Valid Choice Try again")        
+            print("\n Not Valid Choice Try again")
+
+##Colors = {}
+##TM = []
+##DCI = {}
+##DCI_LTYPE = {'Flood':[], 'Land':[], 'Mount':[]}
+##DCI_NAMEIDS = {}
+##MM = {}
+##NCs = {}
+##maxindex = [1]
+##cflist = [.05,.1,.2,.3,.4,.5,.6,.7,1.0,-1.0]
+##flood = .1
+##mount = .9
+def SaveData(CTDAT=CTDAT,TM=TM,DCI=DCI,MM=MM,
+             NCs=NCs,maxindex=maxindex,flood=flood,
+             mount=mount,Colors=Colors,DCI_LTYPE=DCI_LTYPE,
+             DCI_NAMEIDS=DCI_NAMEIDS):
+    dat = {'TM':TM, 'DCI':DCI, 'MM':MM,'NCs':NCs, 'maxindex':maxindex,
+           'flood':flood,'mount':mount, 'Colors':Colors,
+           'DCI_LTYPE':DCI_LTYPE, 'DCI_NAMEIDS':DCI_NAMEIDS}
+    ans = True
+    while ans:
+        ans = raw_input("Please enter the name of the data: ")
+        if len(ans) == 0:
+            print("A name is needed.")
+            if DoYouWantToQuit():
+                ans = False
+        else:
+            CTDAT[str(ans)] = dat
+            str1 = "Successfully saved data to "
+            str1 += str(ans) + "."
+            print(str1)
+            ans = False
+
+def LoadData(CTDAT=CTDAT,TM=TM,DCI=DCI,MM=MM,
+             NCs=NCs,maxindex=maxindex,fm=(flood,mount),
+             Colors=Colors,DCI_LTYPE=DCI_LTYPE,
+             DCI_NAMEIDS=DCI_NAMEIDS):
+##    dat = {'TM':TM, 'DCI':DCI, 'MM':MM,'NCs':NCs, 'maxindex':maxindex,
+##           'flood':flood,'mount':mount, 'Colors':Colors,
+##           'DCI_LTYPE':DCI_LTYPE, 'DCI_NAMEIDS':DCI_NAMEIDS}
+    ans = True
+    while ans:
+        print("Load Data Menu")
+        ans = raw_input("Please enter the name of the data: ")
+        if len(ans) == 0:
+            print("A name is needed.")
+            if DoYouWantToQuit():
+                ans = False
+        else:
+            if str(ans) in CTDAT:
+                dat = CTDAT[str(ans)]
+                TM = dat['TM']
+                DCI = dat['DCI']
+                MM = dat['MM']
+                NCs = dat['NCs']
+                maxindex = dat['maxindex']
+                fm[0] = dat['flood']
+                fm[1] = dat['mount']
+                Colors = dat['Colors']
+                DCI_LTYPE = dat['DCI_LTYPE']
+                DCI_NAMEIDS = dat['DCI_NAMEIDS']
+                str1 = "Successfully loaded data from "
+                str1 += str(ans) + "."
+                print(str1)
+                ans = False
+            else:
+                print("Data name not found.")
+                if DoYouWantToQuit():
+                    ans = False
+
+def DeleteData(CTDAT=CTDAT):
+    ans = True
+    while ans:
+        print("Delete Data Menu")
+        ans = raw_input("Please enter the name of the data you want to delete: ")
+        if str(ans) in CTDAT:
+            str1 = "You entered " + str(ans)
+            print(str1)
+            ans2 = raw_input("Are you sure you want to delete this? [Y/N]")
+            if ans2 == "Y" or ans2 == "y":
+                del CTDAT[str(ans)]
+                str1 = "Sucessefully deleted " + str(ans)
+                print(str1)
+                ans = False
+            else:
+                print("Aborted deleting data.")
+                if DoYouWantToQuit():
+                    ans = False
+        else:
+            print("Name not found in database.")
+            if DoYouWantToQuit():
+                ans = False
+
+def LoadSaveDelData(CTDAT=CTDAT):
+    ans=True
+    while ans:
+        print("Load/Save/Delete Menu")
+        print("""
+        1.List of Data names.
+        2.Save Data
+        3.Load Data
+        4.Delete Data
+        5.Back to Main Menu
+        """)
+        ans = raw_input("What would you like to do? ")
+        if ans == "1":
+            print(list(CTDAT.keys()))
+        elif ans == "2":
+            SaveData()
+        elif ans == "3":
+            LoadData()
+        elif ans == "4":
+            DeleteData()
+        elif ans == "5":
+            ans = False
+        elif ans !="":
+            print("\n Not Valid Choice Try again")
+
+def LoadStarterTemplate(TM=TM,DCI=DCI,MM=MM,
+                        NCs=NCs,maxindex=maxindex,
+                        Colors=Colors,DCI_LTYPE=DCI_LTYPE,
+                        DCI_NAMEIDS=DCI_NAMEIDS,Colors_s1=Colors_s1,
+                        TM_s1=TM_s1,MM_s1=MM_s1,NCs_s1=NCs_s1,
+                        maxindex_s1=maxindex_s1):
+    for tm in TM_s1:
+        TM.append(tm)
+##    TM = TM_s1[0:len(TM_s1)]
+    for mm in MM_s1:
+        MM[mm] = MM_s1[mm]
+##    MM = MM_s1.copy()
+    for col in Colors_s1:
+        Colors[col] = Colors_s1[col]
+##    Colors = Colors_s1.copy()
+    for ncs in NCs_s1:
+        NCs[ncs] = NCs_s1[ncs]
+##    NCs = NCs_s1.copy()
+    for mi in maxindex_s1:
+        maxindex[0] = mi
+##    maxindex = maxindex_s1[0:len(maxindex_s1)]
+##    print(TM)
+##    print(MM)
+##    print(Colors)
+##    print(NCs)
+##    print(maxindex)
+    print("Finished loading Starter template")
 
 def MainMenu():
     ans=True
@@ -2230,7 +2554,9 @@ def MainMenu():
         5.Add/Modify Node Chains dictionary
         6.Set Flood/Mount stage
         7.Tip for setting up Terrain Colorization
-        8.Exit/Quit
+        8.Load/Save/Delete Data to Database
+        9.Load Starter Template Colorization
+        10.Exit/Quit
         """)
         ans=raw_input("What would you like to do? ") 
         if ans=="1": 
@@ -2320,6 +2646,10 @@ def MainMenu():
             been done.  
             """)
         elif ans=="8":
+            LoadSaveDelData()
+        elif ans=="9":
+            LoadStarterTemplate()
+        elif ans=="10":
             print("\n Goodbye")
             ans = False
         elif ans !="":
@@ -2328,3 +2658,4 @@ def MainMenu():
 print('Welcome to the Terrain colorization assistant!')
 print("Let's go ahead and add some terrain colors!")
 MainMenu()
+CTDAT.close()
